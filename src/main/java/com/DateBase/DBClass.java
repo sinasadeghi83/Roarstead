@@ -23,14 +23,22 @@ public class DBClass {
     public void setSession(Session session) {
         this.session = session;
     }
-    
+
     public void openSession() {
-        setSession(sessionFactory.openSession());
-        sessionIsOpen = true;
+        if (!sessionIsOpen) {
+            setSession(sessionFactory.openSession());
+            sessionIsOpen = true;
+        }
+//        else
+        //TODO need an Exception
     }
 
     public void closeSession() {
-        session.close();
-        sessionIsOpen = false;
+        if (sessionIsOpen) {
+            session.close();
+            sessionIsOpen = false;
+        }
+//        else
+        //TODO need an Exception
     }
 }
