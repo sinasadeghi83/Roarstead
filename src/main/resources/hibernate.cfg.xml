@@ -17,11 +17,11 @@
         <property name="connection.password">13821382</property> <!-- DB Password -->
 
         <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property> <!-- DB Dialect -->
-        <property name="hbm2ddl.auto">create</property> <!-- create / create-drop / update -->
+        <property name="hbm2ddl.auto">update</property> <!-- create / create-drop / update -->
 
         <property name="show_sql">true</property> <!-- Show SQL in console -->
         <property name="format_sql">true</property> <!-- Show SQL formatted -->
 
-        <mapping class="com.Model.User"/>
+        <mapping class="com.roarstead.Model.User"/>
     </session-factory>
 </hibernate-configuration>

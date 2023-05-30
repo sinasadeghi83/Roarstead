@@ -1,4 +1,4 @@
-package com.Model;
+package com.roarstead.Model;
 
 import javax.persistence.*;
 

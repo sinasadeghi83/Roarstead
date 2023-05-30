@@ -1,4 +1,4 @@
-package com.DateBase;
+package com.roarstead.Database;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

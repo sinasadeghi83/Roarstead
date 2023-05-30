@@ -1,7 +1,7 @@
 package com.roarstead;
 
-import com.DateBase.DBClass;
-import com.Model.User;
+import com.roarstead.Database.DBClass;
+import com.roarstead.Model.User;
 import org.hibernate.Transaction;
 
 /**
