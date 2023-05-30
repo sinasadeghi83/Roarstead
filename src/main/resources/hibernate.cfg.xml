@@ -11,7 +11,7 @@
 <hibernate-configuration>
     <session-factory>
 
-        <property name="connection.url">jdbc:postgresql://localhost:5432/Login</property> <!-- BD Mane -->
+        <property name="connection.url">jdbc:postgresql://localhost:5432/test</property> <!-- BD Mane -->
         <property name="connection.driver_class">org.postgresql.Driver</property> <!-- DB Driver -->
         <property name="connection.username">root</property> <!-- DB User -->
         <property name="connection.password">13821382</property> <!-- DB Password -->
@@ -21,5 +21,7 @@
 
         <property name="show_sql">true</property> <!-- Show SQL in console -->
         <property name="format_sql">true</property> <!-- Show SQL formatted -->
+
+        <mapping class="com.Model.User"/>
     </session-factory>
 </hibernate-configuration>
