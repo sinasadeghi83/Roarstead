@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -37,12 +37,13 @@ public class User {
 
     }
 
-    public User(String username, String firstName, String lastName, String email, String phone, String password, Date birthDate) {
+    public User(String username, String firstName, String lastName, String email, String phone,String country, String password, Date birthDate) {
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
+        this.country = country;
         this.password = password;
         this.birthDate = birthDate;
     }
