@@ -1,4 +1,4 @@
-package com.roarstead.Database;
+package com.roarstead.Components.Database;
 
 import com.roarstead.Components.Exceptions.SessionAlreadyClosedException;
 import com.roarstead.Components.Exceptions.SessionAlreadyOpenedException;
