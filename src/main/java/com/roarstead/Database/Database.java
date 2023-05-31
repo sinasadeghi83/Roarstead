@@ -6,13 +6,13 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-public class DBClass {
+public class Database {
     private Session session;
     private boolean sessionIsOpen;
     private Configuration configuration;
     private SessionFactory sessionFactory;
 
-    public DBClass() {
+    public Database() {
         configuration = new Configuration();
         configuration.configure();
         sessionFactory = configuration.buildSessionFactory();

@@ -6,7 +6,7 @@ package com.roarstead;
  */
 public class App {
     public static void main( String[] args ) {
-//        DBClass db = new DBClass();
+//        Database db = new Database();
 //        db.openSession();
 //        User user = new User("amirhossein");
 //        Transaction transaction = db.getSession().getTransaction();
