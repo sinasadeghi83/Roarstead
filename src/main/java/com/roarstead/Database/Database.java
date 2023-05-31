@@ -1,7 +1,7 @@
 package com.roarstead.Database;
 
-import com.roarstead.Exception.SessionIsClosedException;
-import com.roarstead.Exception.SessionIsOpenException;
+import com.roarstead.Exception.SessionAlreadyClosedException;
+import com.roarstead.Exception.SessionAlreadyOpenedException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -32,7 +32,7 @@ public class Database {
             sessionIsOpen = true;
         }
         else
-            throw new SessionIsOpenException();
+            throw new SessionAlreadyOpenedException();
     }
 
     public void closeSession() {
@@ -41,6 +41,6 @@ public class Database {
             sessionIsOpen = false;
         }
         else
-            throw new SessionIsClosedException();
+            throw new SessionAlreadyClosedException();
     }
 }
