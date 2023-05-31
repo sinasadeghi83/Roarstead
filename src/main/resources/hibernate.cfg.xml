@@ -10,9 +10,9 @@
 
 <hibernate-configuration>
     <session-factory>
-        <property name="connection.url">jdbc:postgresql://localhost/sinasadeghi</property> <!-- BD Mane -->
+        <property name="connection.url">jdbc:postgresql://localhost/roarstead</property> <!-- BD Mane -->
         <property name="connection.driver_class">org.postgresql.Driver</property> <!-- DB Driver -->
-        <property name="connection.username">sinasadeghi</property> <!-- DB User -->
+        <property name="connection.username">roarstead</property> <!-- DB User -->
         <property name="connection.password">13831383</property> <!-- DB Password -->
 
         <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property> <!-- DB Dialect -->
