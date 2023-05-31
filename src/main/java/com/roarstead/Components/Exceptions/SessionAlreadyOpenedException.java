@@ -1,4 +1,4 @@
-package com.roarstead.Exception;
+package com.roarstead.Components.Exceptions;
 
 public class SessionAlreadyOpenedException extends RuntimeException {
     public SessionAlreadyOpenedException() {

@@ -1,7 +1,7 @@
 package com.roarstead.Database;
 
-import com.roarstead.Exception.SessionAlreadyClosedException;
-import com.roarstead.Exception.SessionAlreadyOpenedException;
+import com.roarstead.Components.Exceptions.SessionAlreadyClosedException;
+import com.roarstead.Components.Exceptions.SessionAlreadyOpenedException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
