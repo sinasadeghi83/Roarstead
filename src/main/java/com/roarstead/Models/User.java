@@ -1,40 +1,50 @@
 package com.roarstead.Models;
 
-import javax.persistence.*;
+import jakarta.persistence.Column;
+
+import jakarta.persistence.*;
+import java.util.Date;
 
 @Entity
-@Table(name = "test", schema = "test_schema")
+@Table
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    @Column
-    private String userName;  //unique
-    @Column
+    @Column(nullable = false, unique = true)
+    private String username;  //unique
+    @Column(name = "first_name", nullable = false)
     private String firstName;
-    @Column
+
+    @Column(name = "last_name", nullable = false)
     private String lastName;
-    @Column
+
+    @Column(unique = true)
     private String email;     //unique and formatting
-    @Column
-    private String phone;     //unique and formatting
-    @Column
-    private String password;        //should get it twice
-    @Column
-    private String date;            //need formatting
+    @Column(unique = true)
+    private String phone;
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private String country;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name="birth_date", nullable = false)
+    private Date birthDate;
 
     public User() {
 
     }
 
-    public User(String userName, String firstName, String lastName, String email, String phone, String password, String date) {
-        this.userName = userName;
+    public User(String username, String firstName, String lastName, String email, String phone, String password, Date birthDate) {
+        this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
         this.password = password;
-        this.date = date;
+        this.birthDate = birthDate;
     }
 
     public int getId() {
@@ -43,14 +53,6 @@ public class User {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public String getFirstName() {
@@ -93,11 +95,27 @@ public class User {
         this.password = password;
     }
 
-    public String getDate() {
-        return date;
+    public String getUsername() {
+        return username;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public Date getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
     }
 }
