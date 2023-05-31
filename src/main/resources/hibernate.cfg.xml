@@ -10,7 +10,6 @@
 
 <hibernate-configuration>
     <session-factory>
-
         <property name="connection.url">jdbc:postgresql://localhost/sinasadeghi</property> <!-- BD Mane -->
         <property name="connection.driver_class">org.postgresql.Driver</property> <!-- DB Driver -->
         <property name="connection.username">sinasadeghi</property> <!-- DB User -->
@@ -23,6 +22,5 @@
         <property name="format_sql">true</property> <!-- Show SQL formatted -->
 
         <mapping class="com.roarstead.Models.User"/>
-
     </session-factory>
 </hibernate-configuration>
