@@ -1,9 +1,5 @@
 package com.roarstead;
 
-import com.roarstead.Database.DBClass;
-import com.roarstead.Model.User;
-import org.hibernate.Transaction;
-
 /**
  * Hello world!
  *

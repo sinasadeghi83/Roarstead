@@ -22,6 +22,6 @@
         <property name="show_sql">true</property> <!-- Show SQL in console -->
         <property name="format_sql">true</property> <!-- Show SQL formatted -->
 
-        <mapping class="com.roarstead.Model.User"/>
+        <mapping class="com.roarstead.Models.User"/>
     </session-factory>
 </hibernate-configuration>
