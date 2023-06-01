@@ -1,5 +1,9 @@
 package com.roarstead.Models;
 
+import com.roarstead.Components.Auth.Models.Auth;
+import com.roarstead.Components.Exceptions.InvalidPasswordException;
+import com.roarstead.Components.Exceptions.ModelNotFoundException;
+import com.roarstead.Components.Exceptions.NotAuthenticatedException;
 import jakarta.persistence.Column;
 
 import jakarta.persistence.*;
@@ -7,7 +11,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements Auth {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -48,12 +52,30 @@ public class User {
         this.birthDate = birthDate;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public void setId(int id) {
         this.id = id;
+    }
+
+    @Override
+    public void enterPassword(String password) {
+        setPassword(password);
+    }
+
+    @Override
+    public Auth identity() throws NotAuthenticatedException {
+        return this;
+    }
+
+    @Override
+    public Auth authenticate() throws InvalidPasswordException, ModelNotFoundException {
+        //TODO authentication using hibernate
+        return null;
     }
 
     public String getFirstName() {
