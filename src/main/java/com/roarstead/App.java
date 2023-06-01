@@ -1,18 +1,28 @@
 package com.roarstead;
 
-/**
- * Hello world!
- *
- */
-public class App {
-    public static void main( String[] args ) {
-//        Database db = new Database();
-//        db.openSession();
-//        User user = new User("amirhossein");
-//        Transaction transaction = db.getSession().getTransaction();
-//        transaction.begin();
-//        db.getSession().save(user);
-//        transaction.commit();
-//        db.closeSession();
+import com.roarstead.Components.Request.RequestHandler;
+import com.roarstead.Components.Response.ResponseHandler;
+import com.sun.net.httpserver.HttpExchange;
+
+public class App extends Thread {
+    private final HttpExchange httpExchange;
+
+    public App(HttpExchange httpExchange) {
+        this.httpExchange = httpExchange;
+    }
+
+    public static App getCurrentApp(){
+        return (App) Thread.currentThread();
+    }
+
+    public HttpExchange getHttpExchange() {
+        return this.httpExchange;
+    }
+
+    @Override
+    public void run() {
+        ResponseHandler responseHandler = new ResponseHandler();
+        RequestHandler requestHandler = new RequestHandler(responseHandler);
+        requestHandler.handle();
     }
 }
