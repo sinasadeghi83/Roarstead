@@ -9,7 +9,6 @@ import java.io.OutputStream;
 
 public class ResponseHandler {
     public static final String JSON_CONTENT = "application/json";
-    public static final int INTERNAL_ERROR = 500;
 
     public void respond(Response response, String contentType) {
         try {
