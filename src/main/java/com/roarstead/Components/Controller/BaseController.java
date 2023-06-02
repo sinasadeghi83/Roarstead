@@ -44,7 +44,7 @@ public abstract class BaseController {
 //            throw new RuntimeException(e);
 //        }
         //TODO: This line should be deleted after completion of all todos
-        return new Response("Server is not ready", ResponseHandler.INTERNAL_ERROR);
+        return new Response("Server is not ready", Response.INTERNAL_ERROR);
     }
 
     //TODO handle checkAccessControl
