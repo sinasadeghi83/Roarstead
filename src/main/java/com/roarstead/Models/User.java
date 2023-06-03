@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -33,6 +34,10 @@ public class User {
     @Column(name="birth_date", nullable = false)
     private Date birthDate;
 
+    @ManyToMany
+    @JoinTable(name = "roar_like", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "roar-id"))
+    private Set<Roar> likedRoars;
+
     public User() {
 
     }
@@ -46,6 +51,14 @@ public class User {
         this.country = country;
         this.password = password;
         this.birthDate = birthDate;
+    }
+
+    public void like(Roar roar) {
+        likedRoars.add(roar);
+    }
+
+    public void unLike(Roar roar) {
+        likedRoars.remove(roar);
     }
 
     public int getId() {
