@@ -1,8 +1,8 @@
 package com.roarstead.Components.Exceptions;
 
-public class InvalidPasswordException extends Exception {
+public class AuthNotFoundException extends UnauthorizedException {
     @Override
     public String getMessage() {
-        return "invalid-pass";
+        return "not-found";
     }
 }

@@ -1,11 +1,13 @@
 package com.roarstead.Components.Auth;
 
 import com.roarstead.App;
+import com.roarstead.Components.Auth.JWT.JwtUtil;
 import com.roarstead.Components.Auth.Models.Auth;
 import com.roarstead.Components.Auth.Models.Permission;
 import com.roarstead.Components.Auth.Models.Role;
 import com.roarstead.Components.Auth.Rbac.Rule;
 import com.roarstead.Components.Database.Database;
+import com.roarstead.Components.Exceptions.AuthNotFoundException;
 import com.roarstead.Components.Exceptions.InvalidPasswordException;
 import com.roarstead.Components.Exceptions.ModelNotFoundException;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
@@ -20,7 +22,7 @@ public class AuthManager {
     //Permission -> Rule
     private Map<String, Rule> permsRule;
 
-    public AuthManager(){
+    public void init(){
         this.permsRule = App.getCurrentApp().getRbacConfig().getPermsRule();
     }
 
@@ -41,6 +43,21 @@ public class AuthManager {
     }
 
     public boolean authorise(List<String> rolesPerms) throws NotAuthenticatedException {
+        //If there's no rolesPerm then everyone has access
+        if(rolesPerms == null || rolesPerms.size() == 0){
+            return true;
+        }
+
+        //If there's one '?' in rolesPerms then guest has access
+        if(isGuest() && !rolesPerms.contains("?")){
+            return false;
+        }
+
+        //If the only rolePerms is '?' then only guest has access
+        if(!isGuest() && rolesPerms.size() == 1 && rolesPerms.contains("?")){
+            return false;
+        }
+
         Database db = App.getCurrentApp().getDb();
 
         String query = "SELECT count(r) FROM Role r JOIN r.auths a WHERE a.id=:userId AND r.name IN (:rolesPerms)";
@@ -93,7 +110,23 @@ public class AuthManager {
         return true;
     }
 
-    public void authenticate(String username, String password) throws ModelNotFoundException, InvalidPasswordException {
+    public void authenticate(String username, String password) throws InvalidPasswordException, AuthNotFoundException {
+        Auth auth = findAuthByUsername(username);
+        if(!auth.getPassword().equals(password)){
+            throw new InvalidPasswordException();
+        }
+        this.auth = auth;
+    }
+
+    public void authenticateByJWT(String token) throws AuthNotFoundException {
+        if(!JwtUtil.validateToken(token)){
+            return;
+        }
+        String username = JwtUtil.extractSubject(token);
+        this.auth = findAuthByUsername(username);
+    }
+
+    public Auth findAuthByUsername(String username) throws AuthNotFoundException {
         String strQuery = "SELECT a FROM Auth a WHERE a.username=:username";
         Query<Auth> query = App.getCurrentApp().getDb().getSession().createQuery(strQuery);
         query.setParameter("username", username);
@@ -101,12 +134,12 @@ public class AuthManager {
         try {
             auth = query.getSingleResult();
         }catch (NoResultException e){
-            throw new ModelNotFoundException();
+            throw new AuthNotFoundException();
         }
+        return auth;
+    }
 
-        if(!auth.getPassword().equals(password)){
-            throw new InvalidPasswordException();
-        }
-        this.auth = auth;
+    public boolean isGuest(){
+        return auth == null;
     }
 }
