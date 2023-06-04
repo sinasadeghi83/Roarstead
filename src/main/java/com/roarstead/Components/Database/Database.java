@@ -1,9 +1,13 @@
 package com.roarstead.Components.Database;
 
+import com.roarstead.Components.Auth.Models.Auth;
+import com.roarstead.Components.Auth.Models.Permission;
+import com.roarstead.Components.Auth.Models.Role;
 import com.roarstead.Components.Exceptions.SessionAlreadyClosedException;
 import com.roarstead.Components.Exceptions.SessionAlreadyOpenedException;
 import com.roarstead.Components.Exceptions.TransactionAlreadyClosedException;
 import com.roarstead.Components.Exceptions.TransactionAlreadyHasBegun;
+import com.roarstead.Models.User;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -11,7 +15,11 @@ import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
 
 import java.util.List;
 
@@ -27,7 +35,11 @@ public class Database {
     public Database() {
         configuration = new Configuration();
         configuration.configure();
-        sessionFactory = configuration.buildSessionFactory();
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                .applySettings(configuration.getProperties())
+                .configure()
+                .build();
+        sessionFactory = configuration.buildSessionFactory(serviceRegistry);
         sessionIsOpen = false;
         transactionHasBegun = false;
     }
@@ -52,7 +64,7 @@ public class Database {
     public void openSessionIfNotOpened() {
         try{
             openSession();
-        }catch (SessionAlreadyClosedException e){
+        }catch (SessionAlreadyOpenedException e){
             System.out.println("Session already open, ignore.");
         }
     }
@@ -97,7 +109,7 @@ public class Database {
             throw new TransactionAlreadyHasBegun();
         }
 
-        session.beginTransaction();
+        transaction = session.beginTransaction();
         transactionHasBegun = true;
     }
 
