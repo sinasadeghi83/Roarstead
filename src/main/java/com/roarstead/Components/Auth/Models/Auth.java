@@ -38,22 +38,6 @@ public abstract class Auth {
     public abstract void enterPassword(String password);
     public abstract Auth identity() throws NotAuthenticatedException;
 
-    public Auth authenticate() throws InvalidPasswordException, ModelNotFoundException{
-        String strQuery = "SELECT a FROM Auth a WHERE a.id=:authId";
-        Query<Auth> query = App.getCurrentApp().getDb().getSession().createQuery(strQuery);
-        Auth auth;
-        try {
-            auth = query.getSingleResult();
-        }catch (NoResultException e){
-            throw new ModelNotFoundException();
-        }
-
-        if(!auth.getPassword().equals(this.getPassword())){
-            throw new InvalidPasswordException();
-        }
-        return auth;
-    }
-
     public Set<Role> getRoles() {
         return roles;
     }

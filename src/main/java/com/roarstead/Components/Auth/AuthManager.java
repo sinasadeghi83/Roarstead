@@ -93,7 +93,20 @@ public class AuthManager {
         return true;
     }
 
-    public void authenticate(Auth auth) throws ModelNotFoundException, InvalidPasswordException {
-        this.auth = auth.authenticate();
+    public void authenticate(String username, String password) throws ModelNotFoundException, InvalidPasswordException {
+        String strQuery = "SELECT a FROM Auth a WHERE a.username=:username";
+        Query<Auth> query = App.getCurrentApp().getDb().getSession().createQuery(strQuery);
+        query.setParameter("username", username);
+        Auth auth;
+        try {
+            auth = query.getSingleResult();
+        }catch (NoResultException e){
+            throw new ModelNotFoundException();
+        }
+
+        if(!auth.getPassword().equals(password)){
+            throw new InvalidPasswordException();
+        }
+        this.auth = auth;
     }
 }
