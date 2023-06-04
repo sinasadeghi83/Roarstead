@@ -2,29 +2,25 @@ package com.roarstead.Components.Auth;
 
 import com.roarstead.App;
 import com.roarstead.Components.Auth.Models.Auth;
+import com.roarstead.Components.Auth.Models.Permission;
+import com.roarstead.Components.Auth.Models.Role;
 import com.roarstead.Components.Auth.Rbac.Rule;
+import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Exceptions.InvalidPasswordException;
 import com.roarstead.Components.Exceptions.ModelNotFoundException;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
-import com.roarstead.Configs.Rbac.RbacConfig;
+import jakarta.persistence.NoResultException;
+import org.hibernate.query.Query;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AuthManager {
     private Auth auth = null;
-    //User id -> roles
-    private Map<Integer, List<String>> usersRoles;
-    //Roles -> permissions
-    private Map<String, List<String>> rolesPerms;
-    //Permssion -> Rule
+
+    //Permission -> Rule
     private Map<String, Rule> permsRule;
 
     public AuthManager(){
-        this.usersRoles = App.getCurrentApp().getRbacConfig().getUsersRoles();
-        this.rolesPerms = App.getCurrentApp().getRbacConfig().getRolesPerms();
         this.permsRule = App.getCurrentApp().getRbacConfig().getPermsRule();
     }
 
@@ -36,28 +32,40 @@ public class AuthManager {
         return auth == null ? null : auth.identity();
     }
 
-    public void assignRole(Auth auth, String role){
-        List<String> userRoles = usersRoles.computeIfAbsent(auth.getId(), k -> new ArrayList<>());
-        userRoles.add(role);
-        if(!rolesPerms.containsKey(role)){
-            rolesPerms.put(role, new ArrayList<>());
-        }
+    public void assignRole(Auth auth, Role role){
+        Database db = App.getCurrentApp().getDb();
+        db.ready();
+        auth.addRole(role);
+        db.getSession().save(auth);
+        db.done();
     }
 
     public boolean authorise(List<String> rolesPerms) throws NotAuthenticatedException {
-        List<String> userRoles = usersRoles.get(this.getUserId());
-        if(userRoles == null){
-            return false;
+        Database db = App.getCurrentApp().getDb();
+
+        String query = "SELECT count(r) FROM Role r JOIN r.auths a WHERE a.id=:userId AND r.name IN (:rolesPerms)";
+        Query<Long> rolesQuery = db.getSession().createQuery(query);
+        rolesQuery.setParameter("userId", this.getUserId());
+        rolesQuery.setParameterList("rolesPerms", rolesPerms);
+        long rolesCount = rolesQuery.getSingleResult();
+        if(rolesCount > 0){
+            return true;
         }
-        for(String rolePerm:
-                rolesPerms){
-            if(userRoles.contains(rolePerm)){
+
+        query = "SELECT p FROM Permission p JOIN p.roles r JOIN r.auths a WHERE a.id=:userId AND p.name IN (:rolesPerms)";
+        Query<Permission> permsQuery = db.getSession().createQuery(query);
+        permsQuery.setParameter("userId", this.getUserId());
+        permsQuery.setParameterList("rolesPerms", rolesPerms);
+
+        List<Permission> perms = permsQuery.getResultList();
+
+        for (Permission perm :
+                perms) {
+            if(this.can(perm.getName())){
                 return true;
             }
-            if(this.can(rolePerm)){
-                return true;
-            }
         }
+
         return false;
     }
 
@@ -66,19 +74,23 @@ public class AuthManager {
     }
 
     public boolean can(String perm, Map<String, Object> params){
-        List<String> userRoles = usersRoles.get(this.getUserId());
-        for (String userRole :
-                userRoles) {
-            List<String> perms = rolesPerms.get(userRole);
-            if (perms.contains(perm)) {
-                if(permsRule.containsKey(perm)) {
-                    Rule rule = permsRule.get(perm);
-                    return rule.execute(this.auth, perm, params);
-                }
-                return true;
-            }
+        String query = "SELECT p FROM Permission p JOIN p.roles r JOIN r.auths a WHERE a.id=:userId AND p.name=:perm";
+        Query<Permission> permsQuery = App.getCurrentApp().getDb().getSession().createQuery(query);
+        permsQuery.setParameter("userId", this.getUserId());
+        permsQuery.setParameter("perm", perm);
+
+        Permission permObj;
+        try {
+            permObj = permsQuery.getSingleResult();
+        }catch (NoResultException e){
+            return false;
         }
-        return false;
+
+        if(permsRule.containsKey(permObj.getName())){
+            Rule rule = permsRule.get(permObj.getName());
+            return rule.execute(this.auth, perm, params);
+        }
+        return true;
     }
 
     public void authenticate(Auth auth) throws ModelNotFoundException, InvalidPasswordException {

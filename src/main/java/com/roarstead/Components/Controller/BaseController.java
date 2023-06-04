@@ -26,7 +26,7 @@ public abstract class BaseController {
         System.out.println("Request body:\n" + rawRequestBody);
         try {
             //TODO Check user access control
-//            User user = new User();
+            User user = new User();
 //            user.setId(App.getCurrentApp().getArgs().get(0));
 //            user.setPassword(App.getArgs().get(1));
 //            App.getAuthManager().authenticate(user);
