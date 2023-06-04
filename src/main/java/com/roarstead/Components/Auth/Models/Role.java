@@ -20,7 +20,7 @@ public class Role {
     private int id;
 
     @ManyToOne
-    @Column(name="parent_id")
+    @JoinColumn(name="parent_id", columnDefinition = "integer default 1")
     private Role parent;
 
     @OneToMany(mappedBy = "parent")
@@ -64,5 +64,13 @@ public class Role {
 
     public void setPermissions(Set<Permission> permissions) {
         this.permissions = permissions;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
