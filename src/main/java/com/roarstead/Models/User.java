@@ -8,6 +8,8 @@ import jakarta.persistence.Column;
 
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "users")
@@ -24,8 +26,6 @@ public class User extends Auth {
     private String email;     //unique and formatting
     @Column(unique = true)
     private String phone;
-    @Column(nullable = false)
-    private String password;
 
     @Column(nullable = false)
     private String country;
@@ -39,24 +39,14 @@ public class User extends Auth {
     }
 
     public User(String username, String firstName, String lastName, String email, String phone,String country, String password, Date birthDate) {
+        super(password);
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
         this.country = country;
-        this.password = password;
         this.birthDate = birthDate;
-    }
-
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
     }
 
     @Override
@@ -67,12 +57,6 @@ public class User extends Auth {
     @Override
     public Auth identity() throws NotAuthenticatedException {
         return this;
-    }
-
-    @Override
-    public Auth authenticate() throws InvalidPasswordException, ModelNotFoundException {
-        //TODO authentication using hibernate
-        return null;
     }
 
     public String getFirstName() {
@@ -105,10 +89,6 @@ public class User extends Auth {
 
     public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public void setPassword(String password) {
