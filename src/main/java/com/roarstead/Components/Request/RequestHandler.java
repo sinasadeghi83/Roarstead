@@ -41,26 +41,22 @@ public class RequestHandler {
         controllerName = controllerName.substring(0, 1).toUpperCase() + parseRouteWord(controllerName.substring(1)) + "Controller";
 
         InputStream requestStream = exchange.getRequestBody();
+        Response response = null;
         try {
             String rawBody = new String(requestStream.readAllBytes(), StandardCharsets.UTF_8);
             requestStream.close();
 
             Class<? extends BaseController> controller = (Class<? extends BaseController>) Class.forName("com.roarstead.Controllers."+controllerName);
             BaseController baseController = controller.getDeclaredConstructor().newInstance();
-            Response response = baseController.runAction(actionName, rawBody);
-            responseHandler.respond(response, ResponseHandler.JSON_CONTENT);
-        } catch (ClassNotFoundException e) {
-            handleNotFound();
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            response = baseController.runAction(actionName, rawBody);
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
             e.printStackTrace();
-        } catch (InstantiationException | IOException e) {
-            throw new RuntimeException(e);
+            response = new Response(Response.NOT_FOUND, 404);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response(Response.INTERNAL_ERROR, ResponseHandler.INTERNAL_ERROR);
         }
-    }
-
-    private void handleNotFound() {
-        Response notFound = new Response(Response.NOT_FOUND, 404);
-        responseHandler.respond(notFound, ResponseHandler.JSON_CONTENT);
+        responseHandler.respond(response, ResponseHandler.JSON_CONTENT);
     }
 
     private String parseRouteWord(String routeWord) {
