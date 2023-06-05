@@ -1,17 +1,19 @@
 package com.roarstead.Models;
 
+import com.roarstead.Components.Auth.Models.Auth;
+import com.roarstead.Components.Exceptions.InvalidPasswordException;
+import com.roarstead.Components.Exceptions.ModelNotFoundException;
+import com.roarstead.Components.Exceptions.NotAuthenticatedException;
 import jakarta.persistence.Column;
 
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+public class User extends Auth {
     @Column(nullable = false, unique = true)
     private String username;  //unique
     @Column(name = "first_name", nullable = false)
@@ -24,8 +26,6 @@ public class User {
     private String email;     //unique and formatting
     @Column(unique = true)
     private String phone;
-    @Column(nullable = false)
-    private String password;
 
     @Column(nullable = false)
     private String country;
@@ -43,16 +43,21 @@ public class User {
     }
 
     public User(String username, String firstName, String lastName, String email, String phone,String country, String password, Date birthDate) {
+        super(password);
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
         this.country = country;
-        this.password = password;
         this.birthDate = birthDate;
     }
 
+    @Override
+    public void enterPassword(String password) {
+        setPassword(password);
+    }
+  
     public void like(Roar roar) {
         likedRoars.add(roar);
     }
@@ -61,12 +66,9 @@ public class User {
         likedRoars.remove(roar);
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+    @Override
+    public Auth identity() throws NotAuthenticatedException {
+        return this;
     }
 
     public String getFirstName() {
@@ -99,10 +101,6 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public void setPassword(String password) {

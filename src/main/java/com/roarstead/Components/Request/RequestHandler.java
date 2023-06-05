@@ -5,12 +5,8 @@ import com.roarstead.Components.Controller.BaseController;
 import com.roarstead.Components.Response.Response;
 import com.roarstead.Components.Response.ResponseHandler;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
 public class RequestHandler {
@@ -41,26 +37,22 @@ public class RequestHandler {
         controllerName = controllerName.substring(0, 1).toUpperCase() + parseRouteWord(controllerName.substring(1)) + "Controller";
 
         InputStream requestStream = exchange.getRequestBody();
+        Response response = null;
         try {
             String rawBody = new String(requestStream.readAllBytes(), StandardCharsets.UTF_8);
             requestStream.close();
 
             Class<? extends BaseController> controller = (Class<? extends BaseController>) Class.forName("com.roarstead.Controllers."+controllerName);
             BaseController baseController = controller.getDeclaredConstructor().newInstance();
-            Response response = baseController.runAction(actionName, rawBody);
-            responseHandler.respond(response, ResponseHandler.JSON_CONTENT);
-        } catch (ClassNotFoundException e) {
-            handleNotFound();
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            response = baseController.runAction(actionName, rawBody);
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
             e.printStackTrace();
-        } catch (InstantiationException | IOException e) {
-            throw new RuntimeException(e);
+            response = new Response(Response.NOT_FOUND_MSG, Response.NOT_FOUND);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response(Response.INTERNAL_ERROR_MSG, Response.INTERNAL_ERROR);
         }
-    }
-
-    private void handleNotFound() {
-        Response notFound = new Response(Response.NOT_FOUND, 404);
-        responseHandler.respond(notFound, ResponseHandler.JSON_CONTENT);
+        responseHandler.respond(response, ResponseHandler.JSON_CONTENT);
     }
 
     private String parseRouteWord(String routeWord) {
