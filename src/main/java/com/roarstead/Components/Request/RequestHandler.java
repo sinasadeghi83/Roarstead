@@ -5,12 +5,8 @@ import com.roarstead.Components.Controller.BaseController;
 import com.roarstead.Components.Response.Response;
 import com.roarstead.Components.Response.ResponseHandler;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
 public class RequestHandler {
@@ -51,10 +47,10 @@ public class RequestHandler {
             response = baseController.runAction(actionName, rawBody);
         } catch (ClassNotFoundException | NoSuchMethodException e) {
             e.printStackTrace();
-            response = new Response(Response.NOT_FOUND, 404);
+            response = new Response(Response.NOT_FOUND_MSG, Response.NOT_FOUND);
         } catch (Exception e) {
             e.printStackTrace();
-            response = new Response(Response.INTERNAL_ERROR, ResponseHandler.INTERNAL_ERROR);
+            response = new Response(Response.INTERNAL_ERROR_MSG, Response.INTERNAL_ERROR);
         }
         responseHandler.respond(response, ResponseHandler.JSON_CONTENT);
     }
