@@ -27,8 +27,8 @@ public class User extends Auth {
     @Column(unique = true)
     private String phone;
 
-    @Column(nullable = false)
-    private String country;
+    @Embedded
+    private Country country;
 
     @Temporal(TemporalType.DATE)
     @Column(name="birth_date", nullable = false)
@@ -42,7 +42,7 @@ public class User extends Auth {
 
     }
 
-    public User(String username, String firstName, String lastName, String email, String phone,String country, String password, Date birthDate) {
+    public User(String username, String firstName, String lastName, String email, String phone,Country country, String password, Date birthDate) {
         super(password);
         this.username = username;
         this.firstName = firstName;
@@ -115,11 +115,11 @@ public class User extends Auth {
         this.username = username;
     }
 
-    public String getCountry() {
+    public Country getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
+    public void setCountry(Country country) {
         this.country = country;
     }
 
