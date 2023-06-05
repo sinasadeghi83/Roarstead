@@ -5,7 +5,7 @@ public class Response {
     public static final String INTERNAL_ERROR_MSG = "500 Server internal error. Contact the server admin.";
     public static final int NOT_FOUND = 404;
     public static final int INTERNAL_ERROR = 500;
-
+  
     private String message;
     private int code;
 
@@ -13,7 +13,6 @@ public class Response {
         this.message = message;
         this.code = code;
     }
-
     public String getMessage() {
         return message;
     }

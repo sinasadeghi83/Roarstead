@@ -10,9 +10,9 @@ import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Entity
-@Table(name = "users")
 public class User extends Auth {
     @Column(nullable = false, unique = true)
     private String username;  //unique
@@ -34,6 +34,10 @@ public class User extends Auth {
     @Column(name="birth_date", nullable = false)
     private Date birthDate;
 
+    @ManyToMany
+    @JoinTable(name = "roar_like", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "roar-id"))
+    private Set<Roar> likedRoars;
+
     public User() {
 
     }
@@ -52,6 +56,14 @@ public class User extends Auth {
     @Override
     public void enterPassword(String password) {
         setPassword(password);
+    }
+  
+    public void like(Roar roar) {
+        likedRoars.add(roar);
+    }
+
+    public void unLike(Roar roar) {
+        likedRoars.remove(roar);
     }
 
     @Override
