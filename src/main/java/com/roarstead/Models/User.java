@@ -1,25 +1,27 @@
 package com.roarstead.Models;
 
+import com.google.gson.annotations.SerializedName;
 import com.roarstead.Components.Auth.Models.Auth;
-import com.roarstead.Components.Exceptions.InvalidPasswordException;
-import com.roarstead.Components.Exceptions.ModelNotFoundException;
+import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
 import jakarta.persistence.Column;
 
 import jakarta.persistence.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Entity
+@Table(name = "users")
 public class User extends Auth {
     @Column(nullable = false, unique = true)
     private String username;  //unique
+
     @Column(name = "first_name", nullable = false)
+    @SerializedName("first_name")
     private String firstName;
 
     @Column(name = "last_name", nullable = false)
+    @SerializedName("last_name")
     private String lastName;
 
     @Column(unique = true)
@@ -32,11 +34,12 @@ public class User extends Auth {
 
     @Temporal(TemporalType.DATE)
     @Column(name="birth_date", nullable = false)
+    @SerializedName("birth_date")
     private Date birthDate;
 
-    @ManyToMany
-    @JoinTable(name = "roar_like", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "roar-id"))
-    private Set<Roar> likedRoars;
+//    @ManyToMany
+//    @JoinTable(name = "roar_like", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "roar-id"))
+//    private Set<Roar> likedRoars;
 
     public User() {
 
@@ -58,13 +61,13 @@ public class User extends Auth {
         setPassword(password);
     }
   
-    public void like(Roar roar) {
-        likedRoars.add(roar);
-    }
-
-    public void unLike(Roar roar) {
-        likedRoars.remove(roar);
-    }
+//    public void like(Roar roar) {
+//        likedRoars.add(roar);
+//    }
+//
+//    public void unLike(Roar roar) {
+//        likedRoars.remove(roar);
+//    }
 
     @Override
     public Auth identity() throws NotAuthenticatedException {

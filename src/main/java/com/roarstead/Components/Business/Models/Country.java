@@ -1,4 +1,4 @@
-package com.roarstead.Models;
+package com.roarstead.Components.Business.Models;
 
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
@@ -30,13 +30,19 @@ public class Country {
 
     private String code;
 
-    public boolean validate(){
-        try (FileReader fileReader = new FileReader(App.getCurrentApp().getConfig().getCountriesFileName())){
+    public static Country getCountryByDialCode(String dialCode){
+        try (FileReader fileReader = new FileReader(App.getCurrentApp().getConfig().getCountriesPath().toFile())){
             Type listCountryType = new TypeToken<ArrayList<Country>>(){}.getType();
             List<Country> countries = App.getCurrentApp().getGson().fromJson(fileReader, listCountryType);
-            return countries.contains(this);
+            for (Country country :
+                    countries) {
+                if (country.getDialCode().equals(dialCode)){
+                    return country;
+                }
+            }
+            return null;
         } catch (IOException e) {
-            return false;
+            return null;
         }
     }
 
