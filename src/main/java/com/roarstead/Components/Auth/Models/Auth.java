@@ -1,12 +1,14 @@
 package com.roarstead.Components.Auth.Models;
 
 import com.roarstead.App;
+import com.roarstead.Components.Annotation.Exclude;
 import com.roarstead.Components.Exceptions.InvalidPasswordException;
 import com.roarstead.Components.Exceptions.ModelNotFoundException;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
 import jakarta.persistence.*;
 import org.hibernate.query.Query;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,9 +17,10 @@ import java.util.Set;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Auth {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     protected int id;
 
+    @Exclude
     @Column(nullable = false)
     protected String password;
 
@@ -48,6 +51,8 @@ public abstract class Auth {
     }
 
     public void addRole(Role role){
+        if(this.roles == null)
+            roles = new HashSet<>();
         this.roles.add(role);
     }
 
