@@ -17,11 +17,12 @@ public class ResponseHandler {
             switch (contentType){
                 case JSON_CONTENT -> rawResponse = new Gson().toJson(response);
             }
+            byte[] bytesResponse = rawResponse.getBytes();
             exchange.getResponseHeaders().set("Content-Type", contentType);
-            exchange.sendResponseHeaders(response.getCode(), rawResponse.length());
+            exchange.sendResponseHeaders(response.getCode(), bytesResponse.length);
 
             OutputStream outputStream = exchange.getResponseBody();
-            outputStream.write(rawResponse.getBytes());
+            outputStream.write(bytesResponse);
             outputStream.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
