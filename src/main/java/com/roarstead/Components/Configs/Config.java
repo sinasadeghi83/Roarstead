@@ -1,5 +1,7 @@
 package com.roarstead.Components.Configs;
 
+import com.google.gson.Gson;
+import com.roarstead.App;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
@@ -7,21 +9,36 @@ import javax.crypto.SecretKey;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Date;
 
 public class Config {
-    public static final String SECRET_FILE_NAME = "secret_key.json";
-    public static final long JWT_EXPIRATION_TIME = 30L * 86400000; // 86400000 : 24 hours in milliseconds
+    public static String CONFIG_FILE_NAME = "config.json";
+    public Path secretPath;
+    public long jwtExpireTime = 86400000; // 86400000 : 24 hours in milliseconds
+    public Path countriesPath;
+    public String dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     private SecretKey secretKey = null;
     private final SignatureAlgorithm secretAlg = SignatureAlgorithm.HS256;
 
     public void init(){
+        loadConfigData();
         secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256); //or HS384 or HS512
         if(loadSecretKey()) {
             generateSecretKey();
             saveSecretKey();
+        }
+    }
+
+    private void loadConfigData() {
+        try{
+            Path configPath = App.getCurrentApp().getPath(CONFIG_FILE_NAME);
+            FileReader fileReader = new FileReader(configPath.toFile());
+            ConfigData configData = new Gson().fromJson(fileReader, ConfigData.class);
+            jwtExpireTime *= configData.getJwtExpireDays();
+            countriesPath = App.getCurrentApp().getPath(configData.getCountriesFileName());
+            dateFormat = configData.getDateFormat();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -31,8 +48,7 @@ public class Config {
 
     private boolean loadSecretKey() {
         try {
-            Path secretPath = Paths.get(SECRET_FILE_NAME);
-            if(!Files.exists(secretPath)){
+            if(secretPath == null){
                 return false;
             }
             FileInputStream fileInput = new FileInputStream(secretPath.toFile());
@@ -47,7 +63,6 @@ public class Config {
 
     public void saveSecretKey(){
         try {
-            Path secretPath = Paths.get(SECRET_FILE_NAME);
             if(!Files.exists(secretPath)){
                 Files.createFile(secretPath);
             }
@@ -72,5 +87,21 @@ public class Config {
 
     public SignatureAlgorithm getSecretAlg() {
         return secretAlg;
+    }
+
+    public long getJwtExpireTime() {
+        return jwtExpireTime;
+    }
+
+    public String getDateFormat() {
+        return dateFormat;
+    }
+
+    public Path getSecretPath() {
+        return secretPath;
+    }
+
+    public Path getCountriesPath() {
+        return countriesPath;
     }
 }

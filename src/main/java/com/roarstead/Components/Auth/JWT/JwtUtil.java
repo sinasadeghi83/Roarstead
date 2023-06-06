@@ -4,14 +4,14 @@ import com.roarstead.App;
 import com.roarstead.Components.Configs.Config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+
 import java.util.Date;
 
 public class JwtUtil {
 
     public static String generateToken(String subject) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + Config.JWT_EXPIRATION_TIME);
+        Date expiryDate = new Date(now.getTime() + App.getCurrentApp().getConfig().getJwtExpireTime());
 
         return Jwts.builder()
                 .setSubject(subject)

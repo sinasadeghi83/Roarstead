@@ -1,12 +1,24 @@
 package com.roarstead;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.roarstead.Components.Auth.AuthManager;
 import com.roarstead.Components.Auth.Rbac.RbacConfig;
 import com.roarstead.Components.Configs.Config;
 import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Request.RequestHandler;
 import com.roarstead.Components.Response.ResponseHandler;
+import com.roarstead.Components.Serializing.DateDeserializer;
+import com.roarstead.Components.Serializing.ExcludeStrategy;
 import com.sun.net.httpserver.HttpExchange;
+
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Date;
 
 public class App extends Thread {
     private final HttpExchange httpExchange;
@@ -14,14 +26,18 @@ public class App extends Thread {
     private final Database database;
     private final Config config;
     private final RbacConfig rbacConfig;
+    private final Gson gson;
+    private final ClassLoader classLoader;
 
-    public App(HttpExchange httpExchange) {
+    public App(HttpExchange httpExchange, ClassLoader classLoader) {
         super();
         this.httpExchange = httpExchange;
         this.database = new Database();
         this.config = new Config();
         this.rbacConfig = new com.roarstead.Configs.Auth.Rbac.RbacConfig();
         this.authManager = new AuthManager();
+        gson = new GsonBuilder().setExclusionStrategies(new ExcludeStrategy()).registerTypeAdapter(Date.class, new DateDeserializer()).create();
+        this.classLoader = classLoader;
     }
 
     public static App getCurrentApp(){
@@ -57,5 +73,18 @@ public class App extends Thread {
 
     public Config getConfig() {
         return config;
+    }
+
+    public Gson getGson() {
+        return gson;
+    }
+
+    public Path getPath(String filePath) {
+        try {
+            URL url = classLoader.getResource(filePath);
+            return Paths.get(url.toURI());
+        } catch (URISyntaxException | NullPointerException e) {
+            return null;
+        }
     }
 }

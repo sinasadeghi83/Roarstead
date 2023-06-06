@@ -20,7 +20,7 @@ public class HttpListener {
         try {
             initialConfigs();
             HttpServer server = HttpServer.create(new InetSocketAddress(HTTP_PORT), 0);
-            server.createContext("/", new HttpHandler());
+            server.createContext("/", new HttpHandler(HttpListener.class.getClassLoader()));
             server.start();
             System.out.println("Server started on port " + HTTP_PORT);
         } catch (IOException e) {
@@ -35,7 +35,7 @@ public class HttpListener {
         Role role = new Role();
         role.setId(0);
         role.setName("@");
-        db.getSession().save(role);
+        db.getSession().saveOrUpdate(role);
         db.done();
         db.closeSessionIfNotClosed();
     }
