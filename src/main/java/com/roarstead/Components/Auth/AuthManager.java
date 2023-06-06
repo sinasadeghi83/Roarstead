@@ -56,6 +56,8 @@ public class AuthManager {
         //If the only rolePerms is '?' then only guest has access
         if(!isGuest() && rolesPerms.size() == 1 && rolesPerms.contains("?")){
             return false;
+        } else if (isGuest() && rolesPerms.size() == 1 && rolesPerms.contains("?")) {
+            return true;
         }
 
         Database db = App.getCurrentApp().getDb();

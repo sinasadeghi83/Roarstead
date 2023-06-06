@@ -16,7 +16,7 @@
         <property name="connection.password">13831383</property> <!-- DB Password -->
 
         <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property> <!-- DB Dialect -->
-        <property name="hbm2ddl.auto">create</property> <!-- create / create-drop / update -->
+        <property name="hbm2ddl.auto">update</property> <!-- create / create-drop / update -->
 
         <property name="show_sql">true</property> <!-- Show SQL in console -->
         <property name="format_sql">true</property> <!-- Show SQL formatted -->
@@ -25,5 +25,7 @@
         <mapping class="com.roarstead.Components.Auth.Models.Role"/>
         <mapping class="com.roarstead.Components.Auth.Models.Permission"/>
         <mapping class="com.roarstead.Models.User"/>
+<!--        <mapping class="com.roarstead.Models.Roar"/>-->
+<!--        <mapping class="com.roarstead.Models.ReRoar"/>-->
     </session-factory>
 </hibernate-configuration>

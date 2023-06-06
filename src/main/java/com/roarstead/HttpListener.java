@@ -20,7 +20,7 @@ public class HttpListener {
         try {
             initialConfigs();
             HttpServer server = HttpServer.create(new InetSocketAddress(HTTP_PORT), 0);
-            server.createContext("/", new HttpHandler());
+            server.createContext("/", new HttpHandler(HttpListener.class.getClassLoader()));
             server.start();
             System.out.println("Server started on port " + HTTP_PORT);
         } catch (IOException e) {
@@ -31,12 +31,18 @@ public class HttpListener {
     private static void initialConfigs() {
         Database db = new Database();
         db.openSessionIfNotOpened();
-        db.ready();
-        Role role = new Role();
-        role.setId(0);
-        role.setName("@");
-        db.getSession().save(role);
-        db.done();
+        long defaultRoleCount = (Long) db.getSession()
+                .createQuery("SELECT count(r) FROM Role r WHERE r.name=:name")
+                .setParameter("name", Role.DEFAULT_NAME)
+                .getSingleResult();
+        if(defaultRoleCount == 0) {
+            db.ready();
+            Role role = new Role();
+            role.setId(0);
+            role.setName(Role.DEFAULT_NAME);
+            db.getSession().saveOrUpdate(role);
+            db.done();
+        }
         db.closeSessionIfNotClosed();
     }
 }

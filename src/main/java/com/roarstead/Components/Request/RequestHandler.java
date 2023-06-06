@@ -1,7 +1,10 @@
 package com.roarstead.Components.Request;
 
+import com.google.gson.JsonObject;
 import com.roarstead.App;
+import com.roarstead.Components.Annotation.POST;
 import com.roarstead.Components.Controller.BaseController;
+import com.roarstead.Components.Exceptions.MethodNotAllowedException;
 import com.roarstead.Components.Response.Response;
 import com.roarstead.Components.Response.ResponseHandler;
 import com.sun.net.httpserver.HttpExchange;
@@ -35,7 +38,6 @@ public class RequestHandler {
          */
         actionName = parseRouteWord("action-"+actionName);
         controllerName = controllerName.substring(0, 1).toUpperCase() + parseRouteWord(controllerName.substring(1)) + "Controller";
-
         InputStream requestStream = exchange.getRequestBody();
         Response response = null;
         try {
@@ -43,12 +45,24 @@ public class RequestHandler {
             requestStream.close();
 
             Class<? extends BaseController> controller = (Class<? extends BaseController>) Class.forName("com.roarstead.Controllers."+controllerName);
+            if(exchange.getRequestMethod().equalsIgnoreCase("GET")
+                    && controller.getMethod(actionName, JsonObject.class).getDeclaredAnnotationsByType(POST.class) != null){
+                throw new MethodNotAllowedException();
+            }
             BaseController baseController = controller.getDeclaredConstructor().newInstance();
             response = baseController.runAction(actionName, rawBody);
         } catch (ClassNotFoundException | NoSuchMethodException e) {
             e.printStackTrace();
             response = new Response(Response.NOT_FOUND_MSG, Response.NOT_FOUND);
-        } catch (Exception e) {
+        }catch (MethodNotAllowedException e){
+            response = new Response(Response.METHOD_NOT_ALLOWED_MSG, Response.METHOD_NOT_ALLOWED);
+        }catch (NullPointerException e) {
+            response = new Response(Response.BAD_REQUEST_MSG, Response.BAD_REQUEST);
+        }catch (Exception e) {
+            if(e.getCause() != null){
+                e = (Exception) e.getCause();
+            }
+            System.err.println(e.getMessage());
             e.printStackTrace();
             response = new Response(Response.INTERNAL_ERROR_MSG, Response.INTERNAL_ERROR);
         }

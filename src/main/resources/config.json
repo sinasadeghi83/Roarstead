@@ -1,0 +1,6 @@
+{
+  "secret_key_file_name": "secret_key.json",
+  "jwt_expire_days": 30,
+  "countries_file_name": "countries.json",
+  "date_format": "yyyy HH:mm"
+}
