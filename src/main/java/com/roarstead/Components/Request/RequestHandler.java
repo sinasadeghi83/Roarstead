@@ -45,9 +45,6 @@ public class RequestHandler {
             requestStream.close();
 
             Class<? extends BaseController> controller = (Class<? extends BaseController>) Class.forName("com.roarstead.Controllers."+controllerName);
-            System.out.println("Request Method: " + exchange.getRequestMethod());
-            System.out.println("Annotations by type: " + controller.getMethod(actionName, JsonObject.class).getDeclaredAnnotationsByType(POST.class));
-            System.out.println("Annotations: " + controller.getMethod(actionName, JsonObject.class).getAnnotations());
             if(exchange.getRequestMethod().equalsIgnoreCase("GET")
                     && controller.getMethod(actionName, JsonObject.class).getDeclaredAnnotationsByType(POST.class) != null){
                 throw new MethodNotAllowedException();
