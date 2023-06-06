@@ -18,6 +18,8 @@ import java.util.Set;
 
 public class UserController extends BaseController {
 
+    private static final String USER_ALREADY_SIGNED_UP = "There's already an account with this username or email or phone number";
+
     @Override
     public Map<String, List<String>> accessControl() {
         return Map.of(
@@ -45,13 +47,18 @@ public class UserController extends BaseController {
             }
             return new Response(message.toString(), Response.UNPROCESSABLE_ENTITY);
         }
-
         Database db = App.getCurrentApp().getDb();
+        long userCount = (Long) db.getSession()
+                    .createQuery("SELECT count(u) FROM User u WHERE u.username=:username OR u.email=:email OR u.phone=:phone")
+                    .setParameter("username", userForm.getUsername())
+                    .setParameter("email", userForm.getEmail())
+                    .setParameter("phone", userForm.getPhone()).getSingleResult();
+        if(userCount > 0)
+            return new Response(USER_ALREADY_SIGNED_UP, Response.CONFLICT);
         db.ready();
         User user = new User(userForm.getUsername(), userForm.getFirstName(), userForm.getLastName(), userForm.getEmail(), userForm.getPhone(), Country.getCountryByDialCode(userForm.getDialCode()), userForm.getPassword(), userForm.getBirthDate());
         db.getSession().save(user);
         db.done();
-
         App.getCurrentApp().getAuthManager().assignRole(user, Role.findRoleByName(Role.DEFAULT_NAME));
         user.setPassword(null);
         user.setRoles(null);
