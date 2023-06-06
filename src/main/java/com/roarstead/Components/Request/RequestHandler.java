@@ -49,7 +49,8 @@ public class RequestHandler {
             e.printStackTrace();
             response = new Response(Response.NOT_FOUND_MSG, Response.NOT_FOUND);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println(e.getCause().getMessage());
+            e.getCause().printStackTrace();
             response = new Response(Response.INTERNAL_ERROR_MSG, Response.INTERNAL_ERROR);
         }
         responseHandler.respond(response, ResponseHandler.JSON_CONTENT);
