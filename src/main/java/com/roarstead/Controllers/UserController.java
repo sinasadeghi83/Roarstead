@@ -38,12 +38,13 @@ public class UserController extends BaseController {
         userForm = gson.fromJson(requestBody, UserForm.class);
         if(!userForm.validate()){
             Set<ConstraintViolation<UserForm>> violations = userForm.getViolations();
-            StringBuilder message = new StringBuilder();
+            String[] messages = new String[violations.size()];
+            int i = 0;
             for (ConstraintViolation<UserForm> violation :
                     violations) {
-                message.append(violation.getMessage());
+                messages[i++] = violation.getMessage();
             }
-            return new Response(message.toString(), Response.UNPROCESSABLE_ENTITY);
+            return new Response(messages, Response.UNPROCESSABLE_ENTITY);
         }
         Database db = App.getCurrentApp().getDb();
         long userCount = (Long) db.getSession()
