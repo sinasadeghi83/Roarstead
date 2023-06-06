@@ -1,8 +1,14 @@
 package com.roarstead.Models;
 
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
+import com.roarstead.App;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Entity;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 @Embeddable
 public class Country {
@@ -23,6 +29,16 @@ public class Country {
     private String emoji;
 
     private String code;
+
+    public boolean validate(){
+        try (FileReader fileReader = new FileReader(App.getCurrentApp().getConfig().getCountriesFileName())){
+            Type listCountryType = new TypeToken<ArrayList<Country>>(){}.getType();
+            List<Country> countries = App.getCurrentApp().getGson().fromJson(fileReader, listCountryType);
+            return countries.contains(this);
+        } catch (IOException e) {
+            return false;
+        }
+    }
 
     public String getName() {
         return name;
