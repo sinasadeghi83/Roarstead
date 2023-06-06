@@ -5,11 +5,15 @@ public class Response {
     public static final String INTERNAL_ERROR_MSG = "500 Server internal error. Contact the server admin.";
     public static final String UNPROCESSABLE_ENTITY_MSG = "422 Unprocessable Entity";
     public static final String CONFLICT_MSG = "409 Conflict";
+    public static final String BAD_REQUEST_MSG = "400 Bad Request";
+    public static final String METHOD_NOT_ALLOWED_MSG = "405 Method Not Allowed";
     public static final int NOT_FOUND = 404;
     public static final int INTERNAL_ERROR = 500;
     public static final int OK = 200;
     public static final int UNPROCESSABLE_ENTITY = 422;
     public static final int CONFLICT = 409;
+    public static final int BAD_REQUEST = 400;
+    public static final int METHOD_NOT_ALLOWED = 405;
 
     private Object message;
     private int code;

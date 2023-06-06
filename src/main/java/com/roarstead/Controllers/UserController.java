@@ -3,6 +3,7 @@ package com.roarstead.Controllers;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.roarstead.App;
+import com.roarstead.Components.Annotation.POST;
 import com.roarstead.Components.Auth.Models.Role;
 import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Controller.BaseController;
@@ -32,6 +33,7 @@ public class UserController extends BaseController {
         return new Response("Yay! It works!", Response.OK);
     }
 
+    @POST
     public Response actionSignUp(JsonObject requestBody){
         Gson gson = App.getCurrentApp().getGson();
         UserForm userForm;
