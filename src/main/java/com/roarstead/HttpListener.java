@@ -31,12 +31,18 @@ public class HttpListener {
     private static void initialConfigs() {
         Database db = new Database();
         db.openSessionIfNotOpened();
-        db.ready();
-        Role role = new Role();
-        role.setId(0);
-        role.setName("@");
-        db.getSession().saveOrUpdate(role);
-        db.done();
+        long defaultRoleCount = (Long) db.getSession()
+                .createQuery("SELECT count(r) FROM Role r WHERE r.name=:name")
+                .setParameter("name", Role.DEFAULT_NAME)
+                .getSingleResult();
+        if(defaultRoleCount == 0) {
+            db.ready();
+            Role role = new Role();
+            role.setId(0);
+            role.setName(Role.DEFAULT_NAME);
+            db.getSession().saveOrUpdate(role);
+            db.done();
+        }
         db.closeSessionIfNotClosed();
     }
 }
