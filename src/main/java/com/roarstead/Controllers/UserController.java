@@ -39,8 +39,6 @@ public class UserController extends BaseController {
         if(!userForm.validate()){
             Set<ConstraintViolation<UserForm>> violations = userForm.getViolations();
             StringBuilder message = new StringBuilder();
-            message.append(Response.UNPROCESSABLE_ENTITY_MSG);
-            message.append('\n');
             for (ConstraintViolation<UserForm> violation :
                     violations) {
                 message.append(violation.getMessage());
