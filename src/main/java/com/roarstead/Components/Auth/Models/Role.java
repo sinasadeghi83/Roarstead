@@ -1,6 +1,8 @@
 package com.roarstead.Components.Auth.Models;
 
+import com.roarstead.App;
 import jakarta.persistence.*;
+import org.hibernate.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.Set;
 
 @Entity
 public class Role {
+
+    public static final String DEFAULT_NAME = "@";
 
     public Role(){}
 
@@ -32,6 +36,7 @@ public class Role {
     @ManyToMany
     private Set<Permission> permissions;
 
+    @Column(unique = true)
     private String name;
 
     public String getName() {
@@ -72,5 +77,16 @@ public class Role {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public static Role findRoleByName(String name){
+        String strQuery = "FROM Role r WHERE r.name=:name";
+        Query<Role> roleQuery = App.getCurrentApp().getDb().getSession().createQuery(strQuery);
+        roleQuery.setParameter("name", name);
+        try {
+            return roleQuery.getSingleResult();
+        }catch (NoResultException e){
+            return null;
+        }
     }
 }
