@@ -22,7 +22,6 @@ public class Config {
 
     public void init(){
         loadConfigData();
-        secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256); //or HS384 or HS512
         if(loadSecretKey()) {
             generateSecretKey();
             saveSecretKey();
@@ -34,7 +33,7 @@ public class Config {
             Path configPath = App.getCurrentApp().getPath(CONFIG_FILE_NAME);
             FileReader fileReader = new FileReader(configPath.toFile());
             ConfigData configData = new Gson().fromJson(fileReader, ConfigData.class);
-            jwtExpireTime *= configData.getJwtExpireDays();
+            jwtExpireTime *= configData.getJwtExpireDays(); //JWT Expire time in config is in days unit
             countriesPath = App.getCurrentApp().getPath(configData.getCountriesFileName());
             dateFormat = configData.getDateFormat();
         } catch (IOException e) {
