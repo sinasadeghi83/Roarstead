@@ -8,6 +8,9 @@ import com.roarstead.Components.Auth.Models.Role;
 import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Controller.BaseController;
 import com.roarstead.Components.Database.Database;
+import com.roarstead.Components.Exceptions.ConflictException;
+import com.roarstead.Components.Exceptions.HttpException;
+import com.roarstead.Components.Exceptions.UnprocessableEntityException;
 import com.roarstead.Components.Response.Response;
 import com.roarstead.Models.User;
 import com.roarstead.Models.UserForm;
@@ -34,7 +37,7 @@ public class UserController extends BaseController {
     }
 
     @POST
-    public Response actionSignUp(JsonObject requestBody){
+    public Response actionSignUp(JsonObject requestBody) throws HttpException {
         Gson gson = App.getCurrentApp().getGson();
         UserForm userForm;
         userForm = gson.fromJson(requestBody, UserForm.class);
@@ -46,7 +49,7 @@ public class UserController extends BaseController {
                     violations) {
                 messages[i++] = violation.getMessage();
             }
-            return new Response(messages, Response.UNPROCESSABLE_ENTITY);
+            throw new UnprocessableEntityException(messages[0]);
         }
         Database db = App.getCurrentApp().getDb();
         long userCount = (Long) db.getSession()
@@ -55,7 +58,7 @@ public class UserController extends BaseController {
                     .setParameter("email", userForm.getEmail())
                     .setParameter("phone", userForm.getPhone()).getSingleResult();
         if(userCount > 0)
-            return new Response(USER_ALREADY_SIGNED_UP, Response.CONFLICT);
+            throw new ConflictException(USER_ALREADY_SIGNED_UP);
         db.ready();
         User user = new User(userForm.getUsername(), userForm.getFirstName(), userForm.getLastName(), userForm.getEmail(), userForm.getPhone(), Country.getCountryByDialCode(userForm.getDialCode()), userForm.getPassword(), userForm.getBirthDate());
         db.getSession().save(user);
