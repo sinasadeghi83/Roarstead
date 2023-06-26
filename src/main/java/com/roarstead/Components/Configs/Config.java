@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Config {
-    public static String CONFIG_FILE_NAME = "config.json";
+    public final static String CONFIG_FILE_NAME = "config.json";
     public Path secretPath;
     public long jwtExpireTime = 86400000; // 86400000 : 24 hours in milliseconds
     public Path countriesPath;

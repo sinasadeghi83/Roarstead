@@ -7,6 +7,8 @@ public class Response {
     public static final String CONFLICT_MSG = "409 Conflict";
     public static final String BAD_REQUEST_MSG = "400 Bad Request";
     public static final String METHOD_NOT_ALLOWED_MSG = "405 Method Not Allowed";
+    public static final String UNAUTHORIZED_MSG = "401 Unauthorized";
+    public static final int UNAUTHORIZED = 401;
     public static final int NOT_FOUND = 404;
     public static final int INTERNAL_ERROR = 500;
     public static final int OK = 200;

@@ -1,8 +1,8 @@
 package com.roarstead.Components.Exceptions;
 
-public class AuthNotFoundException extends UnauthorizedException {
+public class AuthNotFoundException extends Exception {
     @Override
     public String getMessage() {
-        return "not-found";
+        return "Auth not found";
     }
 }
