@@ -7,10 +7,7 @@ import com.roarstead.Components.Auth.Models.Permission;
 import com.roarstead.Components.Auth.Models.Role;
 import com.roarstead.Components.Auth.Rbac.Rule;
 import com.roarstead.Components.Database.Database;
-import com.roarstead.Components.Exceptions.AuthNotFoundException;
-import com.roarstead.Components.Exceptions.InvalidPasswordException;
-import com.roarstead.Components.Exceptions.ModelNotFoundException;
-import com.roarstead.Components.Exceptions.NotAuthenticatedException;
+import com.roarstead.Components.Exceptions.*;
 import jakarta.persistence.NoResultException;
 import org.hibernate.query.Query;
 
@@ -112,17 +109,23 @@ public class AuthManager {
         return true;
     }
 
-    public void authenticate(String username, String password) throws InvalidPasswordException, AuthNotFoundException {
-        Auth auth = findAuthByUsername(username);
+    public void authenticate(String username, String password) throws InvalidCredentialsException {
+        Auth auth = null;
+        try {
+            auth = findAuthByUsername(username);
+        } catch (AuthNotFoundException e) {
+            throw new InvalidCredentialsException();
+        }
         if(!auth.getPassword().equals(password)){
-            throw new InvalidPasswordException();
+            throw new InvalidCredentialsException();
         }
         this.auth = auth;
     }
 
-    public void authenticateByJWT(String token) throws AuthNotFoundException {
+    public void authenticateByJWT(String token) throws AuthNotFoundException, InvalidTokenException {
         if(!JwtUtil.validateToken(token)){
-            return;
+            //TODO: Should throw InvalidTokenException
+            throw new InvalidTokenException();
         }
         String username = JwtUtil.extractSubject(token);
         this.auth = findAuthByUsername(username);

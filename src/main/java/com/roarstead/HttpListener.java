@@ -28,6 +28,7 @@ public class HttpListener {
         }
     }
 
+    //Creates the default role "@"
     private static void initialConfigs() {
         Database db = new Database();
         db.openSessionIfNotOpened();
@@ -38,7 +39,7 @@ public class HttpListener {
         if(defaultRoleCount == 0) {
             db.ready();
             Role role = new Role();
-            role.setId(0);
+            role.setId(1);
             role.setName(Role.DEFAULT_NAME);
             db.getSession().saveOrUpdate(role);
             db.done();

@@ -1,16 +1,10 @@
 package com.roarstead.Components.Auth.Models;
 
-import com.roarstead.App;
 import com.roarstead.Components.Annotation.Exclude;
-import com.roarstead.Components.Exceptions.InvalidPasswordException;
-import com.roarstead.Components.Exceptions.ModelNotFoundException;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
 import jakarta.persistence.*;
-import org.hibernate.query.Query;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Entity
