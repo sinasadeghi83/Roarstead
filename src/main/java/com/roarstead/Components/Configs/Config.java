@@ -20,9 +20,11 @@ public class Config {
     private SecretKey secretKey = null;
     private final SignatureAlgorithm secretAlg = SignatureAlgorithm.HS256;
 
+    private ConfigData configData = null;
+
     public void init(){
         loadConfigData();
-        if(loadSecretKey()) {
+        if(!loadSecretKey()) {
             generateSecretKey();
             saveSecretKey();
         }
@@ -32,9 +34,10 @@ public class Config {
         try{
             Path configPath = App.getCurrentApp().getPath(CONFIG_FILE_NAME);
             FileReader fileReader = new FileReader(configPath.toFile());
-            ConfigData configData = new Gson().fromJson(fileReader, ConfigData.class);
+            configData = new Gson().fromJson(fileReader, ConfigData.class);
             jwtExpireTime *= configData.getJwtExpireDays(); //JWT Expire time in config is in days unit
             countriesPath = App.getCurrentApp().getPath(configData.getCountriesFileName());
+            secretPath = App.getCurrentApp().getPath(configData.getSecretFileName());
             dateFormat = configData.getDateFormat();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -56,17 +59,23 @@ public class Config {
             secretKey = Keys.hmacShaKeyFor(keyBytes);;
             return true;
         }catch (IOException e){
+            e.printStackTrace();
+            System.out.println("IOException at Config loadSecretKey: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     public void saveSecretKey(){
         try {
-            if(!Files.exists(secretPath)){
-                Files.createFile(secretPath);
+            File secretFile = new File(configData.getSecretFileName());
+            if(secretPath == null || !Files.exists(secretPath)){
+                secretFile.createNewFile();
+                secretPath = Path.of(secretFile.getPath());
+            }else{
+                secretFile = secretPath.toFile();
             }
 
-            FileOutputStream fileOut = new FileOutputStream(secretPath.toFile());
+            FileOutputStream fileOut = new FileOutputStream(secretFile);
             ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 
             byte[] keyBytes = secretKey.getEncoded();
