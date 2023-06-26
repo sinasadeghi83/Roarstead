@@ -124,11 +124,14 @@ public class AuthManager {
 
     public void authenticateByJWT(String token) throws AuthNotFoundException, InvalidTokenException {
         if(!JwtUtil.validateToken(token)){
-            //TODO: Should throw InvalidTokenException
             throw new InvalidTokenException();
         }
         String username = JwtUtil.extractSubject(token);
         this.auth = findAuthByUsername(username);
+    }
+
+    public String generateJWT(){
+        return JwtUtil.generateToken(auth.getUsername());
     }
 
     public Auth findAuthByUsername(String username) throws AuthNotFoundException {
