@@ -5,7 +5,6 @@ import com.roarstead.Components.Annotation.ValidCountry;
 import com.roarstead.Components.Annotation.ValidPassword;
 import com.roarstead.Components.Annotation.ValidPhoneNumber;
 import com.roarstead.Components.Annotation.ValidUsername;
-import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Validation.FormModel;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -41,10 +40,6 @@ public class UserForm implements FormModel<UserForm> {
     @ValidPassword
     private String password;
 
-    @NotBlank
-    @SerializedName("repeat_password")
-    private String repeatPassword;
-
     @NotNull
     @ValidCountry
     @SerializedName("dial_code")
@@ -66,7 +61,6 @@ public class UserForm implements FormModel<UserForm> {
         this.email = email;
         this.phone = phone;
         this.password = password;
-        this.repeatPassword = repeatPassword;
         this.dialCode = dialCode;
         this.birthDate = birthDate;
     }
@@ -130,14 +124,6 @@ public class UserForm implements FormModel<UserForm> {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getRepeatPassword() {
-        return repeatPassword;
-    }
-
-    public void setRepeatPassword(String repeatPassword) {
-        this.repeatPassword = repeatPassword;
     }
 
     public String getDialCode() {
