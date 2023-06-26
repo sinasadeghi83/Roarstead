@@ -32,13 +32,7 @@ public abstract class BaseController {
             token = token.split(Request.SCHEME + " ")[1];
             App.getCurrentApp().getAuthManager().authenticateByJWT(token);
         }
-
-        try {
-            checkAccessControl(action);
-        } catch (UnauthorizedException e) {
-            return new Response(e.getMessage(), 401);
-        }
-
+        checkAccessControl(action);
         Method method = null;
         method = this.getClass().getMethod(action, JsonObject.class);
         return (Response) method.invoke(this, jsonBody);
