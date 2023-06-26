@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.roarstead.App;
 import com.roarstead.Components.Annotation.POST;
+import com.roarstead.Components.Auth.AuthManager;
 import com.roarstead.Components.Auth.Models.Role;
 import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Controller.BaseController;
 import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Exceptions.ConflictException;
 import com.roarstead.Components.Exceptions.HttpException;
+import com.roarstead.Components.Exceptions.InvalidCredentialsException;
 import com.roarstead.Components.Exceptions.UnprocessableEntityException;
 import com.roarstead.Components.Response.Response;
 import com.roarstead.Models.User;
@@ -28,7 +30,8 @@ public class UserController extends BaseController {
     public Map<String, List<String>> accessControl() {
         return Map.of(
                 "actionIndex", List.of(),
-                "actionSignUp", List.of("?")
+                "actionSignUp", List.of("?"),
+                "actionGetToken", List.of("?")
         );
     }
 
@@ -67,5 +70,14 @@ public class UserController extends BaseController {
         user.setPassword(null);
         user.setRoles(null);
         return new Response(user, Response.OK);
+    }
+
+    @POST
+    public Response actionGetToken(JsonObject requestBody) throws InvalidCredentialsException {
+        AuthManager authManager = App.getCurrentApp().getAuthManager();
+        authManager.authenticate(requestBody.get("username").getAsString(), requestBody.get("password").getAsString());
+        String token = authManager.generateJWT();
+        JsonObject responseBody = App.getCurrentApp().getGson().fromJson("{\"token\":\"" + token + "\"}", JsonObject.class);
+        return new Response(responseBody, Response.OK);
     }
 }

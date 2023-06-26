@@ -130,6 +130,10 @@ public class AuthManager {
         this.auth = findAuthByUsername(username);
     }
 
+    public String generateJWT(){
+        return JwtUtil.generateToken(auth.getUsername());
+    }
+
     public Auth findAuthByUsername(String username) throws AuthNotFoundException {
         String strQuery = "SELECT a FROM Auth a WHERE a.username=:username";
         Query<Auth> query = App.getCurrentApp().getDb().getSession().createQuery(strQuery);
