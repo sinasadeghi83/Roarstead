@@ -13,8 +13,6 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 public class User extends Auth {
-    @Column(nullable = false, unique = true)
-    private String username;  //unique
 
     @Column(name = "first_name", nullable = false)
     @SerializedName("first_name")
@@ -108,14 +106,6 @@ public class User extends Auth {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public Country getCountry() {

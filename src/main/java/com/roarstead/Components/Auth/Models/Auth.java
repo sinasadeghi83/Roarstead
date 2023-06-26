@@ -14,6 +14,9 @@ public abstract class Auth {
     @GeneratedValue(strategy = GenerationType.TABLE)
     protected int id;
 
+    @Column(nullable = false, unique = true)
+    protected String username;  //unique
+
     @Exclude
     @Column(nullable = false)
     protected String password;
@@ -64,5 +67,13 @@ public abstract class Auth {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
