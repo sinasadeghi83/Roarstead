@@ -5,10 +5,8 @@ import com.roarstead.Components.Auth.Models.Auth;
 import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
 import jakarta.persistence.Column;
-
 import jakarta.persistence.*;
 import java.util.Date;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -34,6 +32,9 @@ public class User extends Auth {
     @Column(name="birth_date", nullable = false)
     @SerializedName("birth_date")
     private Date birthDate;
+
+    @Embedded
+    private Profile profile;
 
 //    @ManyToMany
 //    @JoinTable(name = "roar_like", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "roar-id"))
@@ -122,5 +123,13 @@ public class User extends Auth {
 
     public void setBirthDate(Date birthDate) {
         this.birthDate = birthDate;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }

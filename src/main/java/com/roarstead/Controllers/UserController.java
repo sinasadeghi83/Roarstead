@@ -16,8 +16,16 @@ import com.roarstead.Components.Exceptions.UnprocessableEntityException;
 import com.roarstead.Components.Response.Response;
 import com.roarstead.Models.User;
 import com.roarstead.Models.UserForm;
+import com.sun.net.httpserver.HttpExchange;
 import jakarta.validation.ConstraintViolation;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.RequestContext;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +43,7 @@ public class UserController extends BaseController {
         );
     }
 
-    public Response actionIndex(JsonObject requestBody){
+    public Response actionIndex(JsonObject requestBody) {
         return new Response("Yay! It works!", Response.OK);
     }
 
@@ -44,7 +52,7 @@ public class UserController extends BaseController {
         Gson gson = App.getCurrentApp().getGson();
         UserForm userForm;
         userForm = gson.fromJson(requestBody, UserForm.class);
-        if(!userForm.validate()){
+        if (!userForm.validate()) {
             Set<ConstraintViolation<UserForm>> violations = userForm.getViolations();
             String[] messages = new String[violations.size()];
             int i = 0;
@@ -56,11 +64,11 @@ public class UserController extends BaseController {
         }
         Database db = App.getCurrentApp().getDb();
         long userCount = (Long) db.getSession()
-                    .createQuery("SELECT count(u) FROM User u WHERE u.username=:username OR u.email=:email OR u.phone=:phone")
-                    .setParameter("username", userForm.getUsername())
-                    .setParameter("email", userForm.getEmail())
-                    .setParameter("phone", userForm.getPhone()).getSingleResult();
-        if(userCount > 0)
+                .createQuery("SELECT count(u) FROM User u WHERE u.username=:username OR u.email=:email OR u.phone=:phone")
+                .setParameter("username", userForm.getUsername())
+                .setParameter("email", userForm.getEmail())
+                .setParameter("phone", userForm.getPhone()).getSingleResult();
+        if (userCount > 0)
             throw new ConflictException(USER_ALREADY_SIGNED_UP);
         db.ready();
         User user = new User(userForm.getUsername(), userForm.getFirstName(), userForm.getLastName(), userForm.getEmail(), userForm.getPhone(), Country.getCountryByDialCode(userForm.getDialCode()), userForm.getPassword(), userForm.getBirthDate());
@@ -79,5 +87,51 @@ public class UserController extends BaseController {
         String token = authManager.generateJWT();
         JsonObject responseBody = App.getCurrentApp().getGson().fromJson("{\"token\":\"" + token + "\"}", JsonObject.class);
         return new Response(responseBody, Response.OK);
+    }
+
+    //TODO : make a PUT anotation
+    @POST
+    public Response updateProfileImage() throws Exception {
+        HttpExchange httpExchange = App.getCurrentApp().getHttpExchange();
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+
+        try {
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            List<FileItem> fileItems = upload.parseRequest(new RequestContext() {
+                @Override
+                public String getCharacterEncoding() {
+                    return "UTF-8";
+                }
+
+                @Override
+                public int getContentLength() {
+                    return 0; //tested to work with 0 as return
+                }
+
+                @Override
+                public String getContentType() {
+                    return httpExchange.getRequestHeaders().getFirst("Content-type");
+                }
+
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    return httpExchange.getRequestBody();
+                }
+
+            });
+            for (FileItem fileItem : fileItems) {
+                if (!fileItem.isFormField()) {
+                    String fieldName = fileItem.getFieldName();
+                    String fileName = fileItem.getName();
+                    InputStream fileContent = fileItem.getInputStream();
+                    File outputFile = new File("path/to/save/file/" + fileName);
+                    fileItem.write(outputFile);
+                }
+            }
+            return new Response(Response.OK_UPLOAD, Response.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 }
