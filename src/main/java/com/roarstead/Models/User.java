@@ -35,6 +35,9 @@ public class User extends Auth {
     @SerializedName("birth_date")
     private Date birthDate;
 
+    @Embedded
+    private Profile profile;
+
 //    @ManyToMany
 //    @JoinTable(name = "roar_like", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "roar-id"))
 //    private Set<Roar> likedRoars;
