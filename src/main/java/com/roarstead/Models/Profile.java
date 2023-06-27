@@ -1,15 +1,21 @@
 package com.roarstead.Models;
 
-import jakarta.persistence.Embeddable;
+import com.roarstead.Components.Resource.Models.Image;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.net.URL;
 import java.util.Date;
 @Embeddable
 public class Profile {
-    private Object profImage;
 
-    private Object headerImage;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "prof_img_id", referencedColumnName = "id")
+    private Image profImage;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="header_img_id", referencedColumnName = "id")
+    private Image headerImage;
 
     @Size(min = 0,max = 160,message = "bio must be between 0 and 160 characters")
     private String bio;
@@ -17,6 +23,7 @@ public class Profile {
     @NotNull(message = "location can not be NULL")
     private String location;
 
+    @Column(name = "url")
     private URL webSiteLink;
 
     @NotNull(message = "joinDate con not be NUll")
@@ -26,7 +33,7 @@ public class Profile {
         return profImage;
     }
 
-    public void setProfImage(Object profImage) {
+    public void setProfImage(Image profImage) {
         this.profImage = profImage;
     }
 
@@ -34,7 +41,7 @@ public class Profile {
         return headerImage;
     }
 
-    public void setHeaderImage(Object headerImage) {
+    public void setHeaderImage(Image headerImage) {
         this.headerImage = headerImage;
     }
 
