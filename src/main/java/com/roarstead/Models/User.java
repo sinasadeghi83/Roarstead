@@ -126,4 +126,12 @@ public class User extends Auth {
     public void setBirthDate(Date birthDate) {
         this.birthDate = birthDate;
     }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
 }
