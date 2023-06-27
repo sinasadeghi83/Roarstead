@@ -5,10 +5,8 @@ import com.roarstead.Components.Auth.Models.Auth;
 import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
 import jakarta.persistence.Column;
-
 import jakarta.persistence.*;
 import java.util.Date;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")

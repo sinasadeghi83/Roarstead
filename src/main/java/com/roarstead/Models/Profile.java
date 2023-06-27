@@ -3,7 +3,6 @@ package com.roarstead.Models;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.net.URL;
 import java.util.Date;
 @Embeddable
