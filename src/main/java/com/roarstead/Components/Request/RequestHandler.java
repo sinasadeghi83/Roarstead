@@ -10,6 +10,7 @@ import com.roarstead.Components.Exceptions.MethodNotAllowedException;
 import com.roarstead.Components.Exceptions.NotFoundException;
 import com.roarstead.Components.Response.Response;
 import com.roarstead.Components.Response.ResponseHandler;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.InputStream;
@@ -46,8 +47,15 @@ public class RequestHandler {
         //Handles HttpException to return proper response
         //Otherwise logging the caused exception and returns internal error response
         try {
-            String rawBody = new String(requestStream.readAllBytes(), StandardCharsets.UTF_8);
-            requestStream.close();
+            Headers headers = exchange.getRequestHeaders();
+            String contentType = ((headers.get("Content-type") != null) ? (headers.get("Content-type").toString()) : (null));
+            String rawBody = null;
+            if(contentType != null && contentType.contains("multipart/form-data")) {
+                App.getCurrentApp().getResourceManager().retrieveDownloadedFiles();
+            }else {
+                rawBody = new String(requestStream.readAllBytes(), StandardCharsets.UTF_8);
+                requestStream.close();
+            }
             //Convert three specific not found related exceptions to their according HttpException
             try {
                 Class<? extends BaseController> controller = (Class<? extends BaseController>) Class.forName("com.roarstead.Controllers." + controllerName);
