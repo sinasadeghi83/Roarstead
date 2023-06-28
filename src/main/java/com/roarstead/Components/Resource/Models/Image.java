@@ -1,5 +1,7 @@
 package com.roarstead.Components.Resource.Models;
 
+import com.roarstead.App;
+import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Resource.Converters.FileConverter;
 import jakarta.persistence.*;
 
@@ -12,12 +14,23 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "file_path")
-    @Convert(converter = FileConverter.class)
-    private File file;
+    @Column(name = "image_name")
+    private String imageName;
 
-    public Image(File file) {
-        this.file = file;
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "file_id", referencedColumnName = "id")
+    private FileModel fileModel;
+
+    public Image(){}
+
+    public Image(String imageName, FileModel fileModel) {
+        this.imageName = imageName;
+        this.fileModel = fileModel;
+    }
+
+    public Image(FileModel fileModel){
+        this.fileModel = fileModel;
+        this.imageName = fileModel.getFileName();
     }
 
     public int getId() {
@@ -28,11 +41,19 @@ public class Image {
         this.id = id;
     }
 
-    public File getFile() {
-        return file;
+    public FileModel getFileModel() {
+        return fileModel;
     }
 
-    public void setFile(File file) {
-        this.file = file;
+    public void setFileModel(FileModel fileModel) {
+        this.fileModel = fileModel;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 }
