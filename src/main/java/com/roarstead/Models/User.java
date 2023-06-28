@@ -1,11 +1,15 @@
 package com.roarstead.Models;
 
 import com.google.gson.annotations.SerializedName;
+import com.roarstead.Components.Annotation.Exclude;
 import com.roarstead.Components.Auth.Models.Auth;
 import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
 import jakarta.persistence.Column;
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Entity
@@ -71,6 +75,14 @@ public class User extends Auth {
     @Override
     public Auth identity() throws NotAuthenticatedException {
         return this;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        profile = new Profile();
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        Date currentDate = Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        profile.setCreatedAt(currentDate);
     }
 
     public String getFirstName() {
