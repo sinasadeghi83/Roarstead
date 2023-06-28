@@ -16,11 +16,11 @@ import java.util.Date;
 @Embeddable
 public class Profile {
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "prof_img_id", referencedColumnName = "id")
     private Image profImage;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name="header_img_id", referencedColumnName = "id")
     private Image headerImage;
 
