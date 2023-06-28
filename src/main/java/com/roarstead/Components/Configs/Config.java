@@ -28,7 +28,6 @@ public class Config {
             generateSecretKey();
             saveSecretKey();
         }
-        System.out.println("\n\nCurrent Secret Key:\n" + new String(secretKey.getEncoded()) +"\n\n");
     }
 
     private void loadConfigData() {
