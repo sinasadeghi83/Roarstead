@@ -40,4 +40,4 @@ build/
 
 ### Framework ###
 src/main/resources/secret_key.key
-resources
+/resources
