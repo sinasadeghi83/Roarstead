@@ -96,6 +96,7 @@ public class UserController extends BaseController {
     //TODO : make a PUT anotation
     @POST
     public Response actionUpdateProfileImage() throws Exception {
+        Profile.validateForAvatarImage(0);
         ResourceManager resourceManager = App.getCurrentApp().getResourceManager();
         Database db = App.getCurrentApp().getDb();
         Image image;
@@ -125,6 +126,7 @@ public class UserController extends BaseController {
     //TODO : make a PUT anotation
     @POST
     public Response actionUpdateProfileHeader() throws Exception {
+        Profile.validateForHeaderImage(0);
         ResourceManager resourceManager = App.getCurrentApp().getResourceManager();
         Database db = App.getCurrentApp().getDb();
         Image image;

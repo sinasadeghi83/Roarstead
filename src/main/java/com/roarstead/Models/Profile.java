@@ -2,19 +2,21 @@ package com.roarstead.Models;
 
 import com.roarstead.App;
 import com.roarstead.Components.Database.Database;
+import com.roarstead.Components.Exceptions.RequestEntityTooLarge;
 import com.roarstead.Components.Resource.Models.Image;
 import com.roarstead.Components.Resource.ResourceManager;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.checkerframework.checker.units.qual.C;
 
+import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 @Embeddable
 public class Profile {
+
+    public static final int MAX_HEADER_SIZE = 2048; //in Kilobytes
+    public static final int MAX_AVATAR_SIZE = 1024; //in Kilobytes
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "prof_img_id", referencedColumnName = "id")
@@ -39,11 +41,32 @@ public class Profile {
     @Column(name = "created_at", insertable = true, updatable = false)
     private Date createdAt;
 
+    public static void validateForHeaderImage(int fileItemIndex) throws RequestEntityTooLarge {
+        if(App.getCurrentApp().getResourceManager().getFileItemSize(fileItemIndex) > MAX_HEADER_SIZE)
+            throw new RequestEntityTooLarge(MAX_HEADER_SIZE, Image.SIZE_UNIT);
+    }
+
+    public static void validateForHeaderImage(Image headerImage) throws IOException, RequestEntityTooLarge {
+        if(headerImage.imageSize() > MAX_HEADER_SIZE)
+            throw new RequestEntityTooLarge(MAX_HEADER_SIZE, Image.SIZE_UNIT);
+    }
+
+    public static void validateForAvatarImage(int fileItemIndex) throws RequestEntityTooLarge {
+        if(App.getCurrentApp().getResourceManager().getFileItemSize(fileItemIndex) > MAX_AVATAR_SIZE)
+            throw new RequestEntityTooLarge(MAX_AVATAR_SIZE, Image.SIZE_UNIT);
+    }
+
+    public static void validateForAvatarImage(Image profImage) throws IOException, RequestEntityTooLarge {
+        if(profImage.imageSize() > MAX_AVATAR_SIZE)
+            throw new RequestEntityTooLarge(MAX_AVATAR_SIZE, Image.SIZE_UNIT);
+    }
+
     public Image getProfImage() {
         return profImage;
     }
 
-    public void setProfImage(Image profImage) {
+    public void setProfImage(Image profImage) throws RequestEntityTooLarge, IOException {
+        validateForAvatarImage(profImage);
         this.profImage = profImage;
     }
 
@@ -51,7 +74,8 @@ public class Profile {
         return headerImage;
     }
 
-    public void setHeaderImage(Image headerImage) {
+    public void setHeaderImage(Image headerImage) throws RequestEntityTooLarge, IOException {
+        validateForHeaderImage(headerImage);
         this.headerImage = headerImage;
     }
 
