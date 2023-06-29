@@ -57,11 +57,11 @@ public abstract class BaseController {
         }
     }
 
-    private void checkAccessControl(String action) throws NotAuthenticatedException, MethodNotAllowedException {
+    private void checkAccessControl(String action) throws UnauthorizedException {
         Map<String, List<String>> access = this.accessControl();
         List<String> rolesPerms = access.get(action);
         if(!App.getCurrentApp().getAuthManager().authorise(rolesPerms)){
-            throw new MethodNotAllowedException();
+            throw new UnauthorizedException();
         }
     }
 }
