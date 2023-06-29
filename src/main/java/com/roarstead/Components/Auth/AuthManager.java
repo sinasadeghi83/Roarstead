@@ -57,6 +57,11 @@ public class AuthManager {
             return true;
         }
 
+        //If there's a '@' rolePerms and user logged in then it has access
+        if(!isGuest() && rolesPerms.contains("@")){
+            return true;
+        }
+
         Database db = App.getCurrentApp().getDb();
 
         String query = "SELECT count(r) FROM Role r JOIN r.auths a WHERE a.id=:userId AND r.name IN (:rolesPerms)";
