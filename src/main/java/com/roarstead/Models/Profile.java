@@ -21,9 +21,9 @@ public class Profile {
     public static final int HEIGHT_AVATAR = 400;
     public static final int WIDTH_AVATAR = 400;
     private static final int WIDTH_HEADER = 1500;
-    private static final int HEIGHT_HEADER = 1500;
+    private static final int HEIGHT_HEADER = 500;
     public static final String AVATAR_SIZE_ERROR = "Profile image size must be 400px * 400px";
-    public static final String HEADER_SIZE_ERROR = "Profile image size must be 1500px * 1500px";
+    public static final String HEADER_SIZE_ERROR = "Profile image size must be 1500px * 500px";
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "prof_img_id", referencedColumnName = "id")
