@@ -17,6 +17,8 @@ public class Response {
     public static final int CONFLICT = 409;
     public static final int BAD_REQUEST = 400;
     public static final int METHOD_NOT_ALLOWED = 405;
+    public static final int REQUEST_ENTITY_TOO_LARGE = 413;
+    public static final String REQUEST_ENTITY_TOO_LARGE_MSG = "Uploaded file size must be less than %d %s!";
 
     private Object message;
     private int code;
