@@ -31,6 +31,13 @@ public class ResourceManager {
         fileItems = upload.parseRequest(new HttpHandlerRequestContext(httpExchange));
     }
 
+    public long getFileItemSize(int fileItemIndex) {
+        if(fileItemIndex >= fileItems.size()){
+            throw new IndexOutOfBoundsException();
+        }
+        return fileItems.get(fileItemIndex).getSize() / 1024; // in Kilobytes
+    }
+
     public FileModel saveFileItem(int index) throws Exception {
         if(index >= fileItems.size()){
             throw new IndexOutOfBoundsException();
