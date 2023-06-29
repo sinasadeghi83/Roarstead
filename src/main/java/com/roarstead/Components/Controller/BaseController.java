@@ -6,6 +6,8 @@ import com.roarstead.App;
 import com.roarstead.Components.Exceptions.*;
 import com.roarstead.Components.Request.Request;
 import com.roarstead.Components.Response.Response;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,9 +27,12 @@ public abstract class BaseController {
     }
 
     public Response runAction(String action, String rawRequestBody) throws Exception {
-        JsonObject jsonBody = gson.fromJson(rawRequestBody, JsonObject.class);
-        if(jsonBody.has(Request.AUTH_KEY)){
-            String token = jsonBody.get(Request.AUTH_KEY).getAsString();
+        Headers headers = App.getCurrentApp().getHttpExchange().getRequestHeaders();
+        JsonObject jsonBody = null;
+        if(rawRequestBody != null)
+            jsonBody = gson.fromJson(rawRequestBody, JsonObject.class);
+        if(headers.get(Request.AUTH_KEY) != null){
+            String token = headers.get(Request.AUTH_KEY).toString();
             token = token.split(Request.SCHEME + " ")[1];
             try {
                 App.getCurrentApp().getAuthManager().authenticateByJWT(token);
@@ -37,9 +42,14 @@ public abstract class BaseController {
         }
         checkAccessControl(action);
         Method method = null;
-        method = this.getClass().getMethod(action, JsonObject.class);
         try {
-            return (Response) method.invoke(this, jsonBody);
+            if(jsonBody != null) {
+                method = this.getClass().getMethod(action, JsonObject.class);
+                return (Response) method.invoke(this, jsonBody);
+            }else {
+                method = this.getClass().getMethod(action);
+                return (Response) method.invoke(this);
+            }
         }catch (Exception e){
             if(e.getCause() != null)
                 throw (Exception) e.getCause();
@@ -47,11 +57,11 @@ public abstract class BaseController {
         }
     }
 
-    private void checkAccessControl(String action) throws NotAuthenticatedException, MethodNotAllowedException {
+    private void checkAccessControl(String action) throws UnauthorizedException {
         Map<String, List<String>> access = this.accessControl();
         List<String> rolesPerms = access.get(action);
         if(!App.getCurrentApp().getAuthManager().authorise(rolesPerms)){
-            throw new MethodNotAllowedException();
+            throw new UnauthorizedException();
         }
     }
 }

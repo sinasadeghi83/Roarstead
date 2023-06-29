@@ -25,6 +25,8 @@
         <mapping class="com.roarstead.Components.Auth.Models.Role"/>
         <mapping class="com.roarstead.Components.Auth.Models.Permission"/>
         <mapping class="com.roarstead.Models.User"/>
+        <mapping class="com.roarstead.Components.Resource.Models.FileModel"/>
+        <mapping class="com.roarstead.Components.Resource.Models.Image"/>
 <!--        <mapping class="com.roarstead.Models.Roar"/>-->
 <!--        <mapping class="com.roarstead.Models.ReRoar"/>-->
     </session-factory>

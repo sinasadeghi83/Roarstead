@@ -7,6 +7,7 @@ import com.roarstead.Components.Auth.Rbac.RbacConfig;
 import com.roarstead.Components.Configs.Config;
 import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Request.RequestHandler;
+import com.roarstead.Components.Resource.ResourceManager;
 import com.roarstead.Components.Response.ResponseHandler;
 import com.roarstead.Components.Serializing.DateDeserializer;
 import com.roarstead.Components.Serializing.ExcludeStrategy;
@@ -28,6 +29,7 @@ public class App extends Thread {
     private final RbacConfig rbacConfig;
     private final Gson gson;
     private final ClassLoader classLoader;
+    private final ResourceManager resourceManager;
 
     public App(HttpExchange httpExchange, ClassLoader classLoader) {
         super();
@@ -38,6 +40,7 @@ public class App extends Thread {
         this.authManager = new AuthManager();
         gson = new GsonBuilder().setExclusionStrategies(new ExcludeStrategy()).registerTypeAdapter(Date.class, new DateDeserializer()).create();
         this.classLoader = classLoader;
+        this.resourceManager = new ResourceManager();
     }
 
     public static App getCurrentApp(){
@@ -86,5 +89,9 @@ public class App extends Thread {
         } catch (URISyntaxException | NullPointerException e) {
             return null;
         }
+    }
+
+    public ResourceManager getResourceManager() {
+        return resourceManager;
     }
 }

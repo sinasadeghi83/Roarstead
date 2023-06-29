@@ -39,4 +39,5 @@ build/
 .DS_Store
 
 ### Framework ###
-secret_key.key
+src/main/resources/secret_key.key
+/resources

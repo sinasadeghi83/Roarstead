@@ -9,23 +9,15 @@ import com.roarstead.Components.Auth.Models.Role;
 import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Controller.BaseController;
 import com.roarstead.Components.Database.Database;
-import com.roarstead.Components.Exceptions.ConflictException;
-import com.roarstead.Components.Exceptions.HttpException;
-import com.roarstead.Components.Exceptions.InvalidCredentialsException;
-import com.roarstead.Components.Exceptions.UnprocessableEntityException;
+import com.roarstead.Components.Exceptions.*;
+import com.roarstead.Components.Resource.Models.Image;
+import com.roarstead.Components.Resource.ResourceManager;
 import com.roarstead.Components.Response.Response;
+import com.roarstead.Models.Profile;
 import com.roarstead.Models.User;
 import com.roarstead.Models.UserForm;
-import com.sun.net.httpserver.HttpExchange;
 import jakarta.validation.ConstraintViolation;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.RequestContext;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +31,9 @@ public class UserController extends BaseController {
         return Map.of(
                 "actionIndex", List.of(),
                 "actionSignUp", List.of("?"),
-                "actionGetToken", List.of("?")
+                "actionGetToken", List.of("?"),
+                "actionUpdateProfileImage", List.of("@"),
+                "actionUpdateProfileHeader", List.of("@")
         );
     }
 
@@ -72,12 +66,15 @@ public class UserController extends BaseController {
             throw new ConflictException(USER_ALREADY_SIGNED_UP);
         db.ready();
         User user = new User(userForm.getUsername(), userForm.getFirstName(), userForm.getLastName(), userForm.getEmail(), userForm.getPhone(), Country.getCountryByDialCode(userForm.getDialCode()), userForm.getPassword(), userForm.getBirthDate());
+        user.setProfile(new Profile());
         db.getSession().save(user);
         db.done();
         App.getCurrentApp().getAuthManager().assignRole(user, Role.findRoleByName(Role.DEFAULT_NAME));
-        user.setPassword(null);
-        user.setRoles(null);
-        return new Response(user, Response.OK);
+        JsonObject userRaw = (JsonObject) gson.toJsonTree(userForm);
+        userRaw.addProperty("id", user.getId());
+        userRaw.addProperty("country", user.getCountry().getName());
+        userRaw.add("created_at", gson.toJsonTree(user.getProfile().getCreatedAt()));
+        return new Response(userRaw, Response.OK);
     }
 
     @POST
@@ -91,47 +88,97 @@ public class UserController extends BaseController {
 
     //TODO : make a PUT anotation
     @POST
-    public Response updateProfileImage() throws Exception {
-        HttpExchange httpExchange = App.getCurrentApp().getHttpExchange();
-        DiskFileItemFactory factory = new DiskFileItemFactory();
+    public Response actionUpdateProfileImage() throws Exception {
+        //Validate file size
+        Profile.validateSizeForAvatarImage(0);
+
+        ResourceManager resourceManager = App.getCurrentApp().getResourceManager();
+        Database db = App.getCurrentApp().getDb();
+
+        //Retrieve uploaded image
+        Image image;
+        try {
+            db.ready();
+            image = resourceManager.createImageFromFileItem(0);
+            db.getSession().persist(image);
+            db.done();
+        } catch (FileModelIsNotAnImageException e){
+            resourceManager.deleteFileModel(e.getFileModel());
+            throw new UnprocessableEntityException("File is not an image!");
+        }catch (Exception e) {
+            throw new BadRequestException();
+        }
 
         try {
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            List<FileItem> fileItems = upload.parseRequest(new RequestContext() {
-                @Override
-                public String getCharacterEncoding() {
-                    return "UTF-8";
-                }
-
-                @Override
-                public int getContentLength() {
-                    return 0; //tested to work with 0 as return
-                }
-
-                @Override
-                public String getContentType() {
-                    return httpExchange.getRequestHeaders().getFirst("Content-type");
-                }
-
-                @Override
-                public InputStream getInputStream() throws IOException {
-                    return httpExchange.getRequestBody();
-                }
-
-            });
-            for (FileItem fileItem : fileItems) {
-                if (!fileItem.isFormField()) {
-                    String fieldName = fileItem.getFieldName();
-                    String fileName = fileItem.getName();
-                    InputStream fileContent = fileItem.getInputStream();
-                    File outputFile = new File("path/to/save/file/" + fileName);
-                    fileItem.write(outputFile);
-                }
-            }
-            return new Response(Response.OK_UPLOAD, Response.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
+            Profile.validateForAvatarImage(image);
+        }catch (Exception e){
+            resourceManager.deleteImage(image);
             throw e;
         }
+
+        AuthManager authManager = App.getCurrentApp().getAuthManager();
+        User user = (User) authManager.identity();
+        Profile profile = user.getProfile();
+
+        if(profile == null){
+            profile = new Profile();
+        }else{
+            profile.deleteProfileImage(user);
+        }
+
+        db.ready();
+        profile.setProfImage(image);
+        db.getSession().merge(user);
+        db.done();
+
+        return new Response(Response.OK_UPLOAD, Response.OK);
+    }
+
+    //TODO : make a PUT anotation
+    @POST
+    public Response actionUpdateProfileHeader() throws Exception {
+        //Validate file size
+        Profile.validateSizeForHeaderImage(0);
+
+        ResourceManager resourceManager = App.getCurrentApp().getResourceManager();
+        Database db = App.getCurrentApp().getDb();
+
+        //Retrieve uploaded image
+        Image image;
+        try {
+            db.ready();
+            image = resourceManager.createImageFromFileItem(0);
+            db.getSession().persist(image);
+            db.done();
+        } catch (FileModelIsNotAnImageException e){
+            resourceManager.deleteFileModel(e.getFileModel());
+            throw new UnprocessableEntityException("File is not an image!");
+        } catch (Exception e) {
+            throw new BadRequestException();
+        }
+
+        try {
+            Profile.validateForHeaderImage(image);
+        }catch (Exception e){
+            resourceManager.deleteImage(image);
+            throw e;
+        }
+
+        AuthManager authManager = App.getCurrentApp().getAuthManager();
+        User user = (User) authManager.identity();
+        Profile profile = user.getProfile();
+
+        if(profile == null){
+            profile = new Profile();
+        }else{
+            profile.deleteHeaderImage(user);
+        }
+
+        db.ready();
+        profile.setHeaderImage(image);
+        db.getSession().merge(user);
+        db.done();
+
+        return new Response(Response.OK_UPLOAD, Response.OK);
     }
 }
