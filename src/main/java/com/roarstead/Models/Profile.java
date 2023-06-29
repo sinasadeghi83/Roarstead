@@ -99,5 +99,18 @@ public class Profile {
         ResourceManager resourceManager = App.getCurrentApp().getResourceManager();
         resourceManager.deleteImage(profImageTemp);
     }
+
+    public void deleteHeaderImage(User user) {
+        if(this.headerImage == null)
+            return;
+        Database db = App.getCurrentApp().getDb();
+        Image headerImage = this.headerImage;
+        db.ready();
+        this.headerImage = null;
+        db.getSession().merge(user);
+        db.done();
+        ResourceManager resourceManager = App.getCurrentApp().getResourceManager();
+        resourceManager.deleteImage(headerImage);
+    }
 }
 
