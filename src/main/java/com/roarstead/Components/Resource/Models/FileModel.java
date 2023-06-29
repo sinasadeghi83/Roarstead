@@ -1,11 +1,13 @@
 package com.roarstead.Components.Resource.Models;
 
+import com.google.common.io.Files;
 import com.roarstead.App;
 import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Resource.Converters.FileConverter;
 import jakarta.persistence.*;
 
 import java.io.File;
+import java.io.IOException;
 
 @Entity
 @Table(name = "files")
@@ -51,5 +53,9 @@ public class FileModel {
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public long fileSize() throws IOException {
+        return Files.asByteSource(file).size() / 1024;
     }
 }

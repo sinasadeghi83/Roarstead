@@ -6,10 +6,14 @@ import com.roarstead.Components.Resource.Converters.FileConverter;
 import jakarta.persistence.*;
 
 import java.io.File;
+import java.io.IOException;
 
 @Entity
 @Table(name="images")
 public class Image {
+
+    public static final String SIZE_UNIT = "Kilobytes";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -55,5 +59,9 @@ public class Image {
 
     public void setImageName(String imageName) {
         this.imageName = imageName;
+    }
+
+    public long imageSize() throws IOException {
+        return this.fileModel.fileSize();
     }
 }
