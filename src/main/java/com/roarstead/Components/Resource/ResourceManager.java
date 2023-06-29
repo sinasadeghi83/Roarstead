@@ -3,6 +3,7 @@ package com.roarstead.Components.Resource;
 import com.google.common.io.Files;
 import com.roarstead.App;
 import com.roarstead.Components.Database.Database;
+import com.roarstead.Components.Exceptions.FileModelIsNotAnImageException;
 import com.roarstead.Components.Resource.Models.FileModel;
 import com.roarstead.Components.Resource.Models.Image;
 import com.sun.net.httpserver.HttpExchange;
@@ -66,7 +67,7 @@ public class ResourceManager {
     }
 
     //TODO: Check image format
-    public Image createImageFromFileModel(FileModel imageFileModel) {
+    public Image createImageFromFileModel(FileModel imageFileModel) throws FileModelIsNotAnImageException, IOException {
         return new Image(imageFileModel);
     }
 

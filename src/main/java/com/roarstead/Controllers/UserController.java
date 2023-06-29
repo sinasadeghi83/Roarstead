@@ -16,16 +16,8 @@ import com.roarstead.Components.Response.Response;
 import com.roarstead.Models.Profile;
 import com.roarstead.Models.User;
 import com.roarstead.Models.UserForm;
-import com.sun.net.httpserver.HttpExchange;
 import jakarta.validation.ConstraintViolation;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.RequestContext;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +32,8 @@ public class UserController extends BaseController {
                 "actionIndex", List.of(),
                 "actionSignUp", List.of("?"),
                 "actionGetToken", List.of("?"),
-                "actionUpdateProfileImage", List.of("@")
+                "actionUpdateProfileImage", List.of("@"),
+                "actionUpdateProfileHeader", List.of("@")
         );
     }
 
@@ -96,60 +89,96 @@ public class UserController extends BaseController {
     //TODO : make a PUT anotation
     @POST
     public Response actionUpdateProfileImage() throws Exception {
-        Profile.validateForAvatarImage(0);
+        //Validate file size
+        Profile.validateSizeForAvatarImage(0);
+
         ResourceManager resourceManager = App.getCurrentApp().getResourceManager();
         Database db = App.getCurrentApp().getDb();
+
+        //Retrieve uploaded image
         Image image;
         try {
             db.ready();
             image = resourceManager.createImageFromFileItem(0);
-            db.getSession().save(image);
+            db.getSession().persist(image);
             db.done();
-        } catch (Exception e) {
+        } catch (FileModelIsNotAnImageException e){
+            resourceManager.deleteFileModel(e.getFileModel());
+            throw new UnprocessableEntityException("File is not an image!");
+        }catch (Exception e) {
             throw new BadRequestException();
         }
+
+        try {
+            Profile.validateForAvatarImage(image);
+        }catch (Exception e){
+            resourceManager.deleteImage(image);
+            throw e;
+        }
+
         AuthManager authManager = App.getCurrentApp().getAuthManager();
         User user = (User) authManager.identity();
         Profile profile = user.getProfile();
+
         if(profile == null){
             profile = new Profile();
         }else{
             profile.deleteProfileImage(user);
         }
+
         db.ready();
         profile.setProfImage(image);
         db.getSession().merge(user);
         db.done();
+
         return new Response(Response.OK_UPLOAD, Response.OK);
     }
 
     //TODO : make a PUT anotation
     @POST
     public Response actionUpdateProfileHeader() throws Exception {
-        Profile.validateForHeaderImage(0);
+        //Validate file size
+        Profile.validateSizeForHeaderImage(0);
+
         ResourceManager resourceManager = App.getCurrentApp().getResourceManager();
         Database db = App.getCurrentApp().getDb();
+
+        //Retrieve uploaded image
         Image image;
         try {
             db.ready();
             image = resourceManager.createImageFromFileItem(0);
-            db.getSession().save(image);
+            db.getSession().persist(image);
             db.done();
+        } catch (FileModelIsNotAnImageException e){
+            resourceManager.deleteFileModel(e.getFileModel());
+            throw new UnprocessableEntityException("File is not an image!");
         } catch (Exception e) {
             throw new BadRequestException();
         }
+
+        try {
+            Profile.validateForHeaderImage(image);
+        }catch (Exception e){
+            resourceManager.deleteImage(image);
+            throw e;
+        }
+
         AuthManager authManager = App.getCurrentApp().getAuthManager();
         User user = (User) authManager.identity();
         Profile profile = user.getProfile();
+
         if(profile == null){
             profile = new Profile();
         }else{
             profile.deleteHeaderImage(user);
         }
+
         db.ready();
         profile.setHeaderImage(image);
         db.getSession().merge(user);
         db.done();
+
         return new Response(Response.OK_UPLOAD, Response.OK);
     }
 }
