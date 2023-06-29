@@ -15,6 +15,7 @@ import com.roarstead.Components.Resource.Models.Image;
 import com.roarstead.Components.Resource.ResourceManager;
 import com.roarstead.Components.Response.Response;
 import com.roarstead.Models.Profile;
+import com.roarstead.Models.ProfileForm;
 import com.roarstead.Models.User;
 import com.roarstead.Models.UserForm;
 import jakarta.validation.ConstraintViolation;
@@ -198,23 +199,29 @@ public class UserController extends BaseController {
         Profile profile = user.getProfile();
 
         //Getting data to be updated
-        JsonElement bio = jsonObject.get("bio");
-        JsonElement location = jsonObject.get("location");
-        JsonElement websiteLink = jsonObject.get("url");
+        ProfileForm profileForm = gson.fromJson(jsonObject, ProfileForm.class);
+
+        //Validating data
+        if (!profileForm.validate()) {
+            Set<ConstraintViolation<ProfileForm>> violations = profileForm.getViolations();
+            String[] messages = new String[violations.size()];
+            int i = 0;
+            for (ConstraintViolation<ProfileForm> violation :
+                    violations) {
+                messages[i++] = violation.getMessage();
+            }
+            throw new UnprocessableEntityException(messages[0]);
+        }
 
         //Updating data
-        if(bio != null)
-            profile.setBio(bio.getAsString());
+        if(profileForm.getBio() != null)
+            profile.setBio(profileForm.getBio());
 
-        if(location != null)
-            profile.setLocation(location.getAsString());
+        if(profileForm.getLocation() != null)
+            profile.setLocation(profileForm.getLocation());
 
-        try {
-            if(websiteLink != null)
-                profile.setWebSiteLink(new URI(websiteLink.getAsString()).toURL());
-        }catch (IllegalArgumentException e){
-            throw new UnprocessableEntityException("Invalid URL!");
-        }
+        if(profileForm.getWebsiteLink() != null)
+            profile.setWebSiteLink(new URI(profileForm.getWebsiteLink()).toURL());
 
         //Updating database
         db.ready();
