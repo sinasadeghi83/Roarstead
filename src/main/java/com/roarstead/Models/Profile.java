@@ -1,6 +1,8 @@
 package com.roarstead.Models;
 
+import com.google.gson.JsonObject;
 import com.roarstead.App;
+import com.roarstead.Components.Annotation.Exclude;
 import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Exceptions.RequestEntityTooLarge;
 import com.roarstead.Components.Exceptions.UnprocessableEntityException;
@@ -15,15 +17,14 @@ import java.net.URL;
 import java.util.Date;
 @Embeddable
 public class Profile {
-
     public static final int MAX_HEADER_SIZE = 2048; //in Kilobytes
     public static final int MAX_AVATAR_SIZE = 1024; //in Kilobytes
     public static final int HEIGHT_AVATAR = 400;
     public static final int WIDTH_AVATAR = 400;
-    private static final int WIDTH_HEADER = 1500;
-    private static final int HEIGHT_HEADER = 1500;
+    public static final int WIDTH_HEADER = 1500;
+    public static final int HEIGHT_HEADER = 500;
     public static final String AVATAR_SIZE_ERROR = "Profile image size must be 400px * 400px";
-    public static final String HEADER_SIZE_ERROR = "Profile image size must be 1500px * 1500px";
+    public static final String HEADER_SIZE_ERROR = "Profile image size must be 1500px * 500px";
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "prof_img_id", referencedColumnName = "id")
@@ -150,6 +151,16 @@ public class Profile {
         db.done();
         ResourceManager resourceManager = App.getCurrentApp().getResourceManager();
         resourceManager.deleteImage(headerImage);
+    }
+
+    public JsonObject toJson(){
+        JsonObject result = new JsonObject();
+        result.addProperty("bio", bio);
+        result.addProperty("location", location);
+        result.addProperty("url", webSiteLink != null ? webSiteLink.toString() : null);
+        result.addProperty("created_at", createdAt.toString());
+
+        return result;
     }
 }
 

@@ -1,6 +1,7 @@
 package com.roarstead.Controllers;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.roarstead.App;
 import com.roarstead.Components.Annotation.POST;
@@ -18,6 +19,10 @@ import com.roarstead.Models.User;
 import com.roarstead.Models.UserForm;
 import jakarta.validation.ConstraintViolation;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +38,8 @@ public class UserController extends BaseController {
                 "actionSignUp", List.of("?"),
                 "actionGetToken", List.of("?"),
                 "actionUpdateProfileImage", List.of("@"),
-                "actionUpdateProfileHeader", List.of("@")
+                "actionUpdateProfileHeader", List.of("@"),
+                "actionUpdateProfile", List.of("@")
         );
     }
 
@@ -180,5 +186,42 @@ public class UserController extends BaseController {
         db.done();
 
         return new Response(Response.OK_UPLOAD, Response.OK);
+    }
+
+    //TODO: make a PUT annotation
+    @POST
+    public Response actionUpdateProfile(JsonObject jsonObject) throws NotAuthenticatedException, MalformedURLException, URISyntaxException, UnprocessableEntityException {
+        Database db = App.getCurrentApp().getDb();
+
+        //Get user profile
+        User user = (User) App.getCurrentApp().getAuthManager().identity();
+        Profile profile = user.getProfile();
+
+        //Getting data to be updated
+        JsonElement bio = jsonObject.get("bio");
+        JsonElement location = jsonObject.get("location");
+        JsonElement websiteLink = jsonObject.get("url");
+
+        //Updating data
+        if(bio != null)
+            profile.setBio(bio.getAsString());
+
+        if(location != null)
+            profile.setLocation(location.getAsString());
+
+        try {
+            if(websiteLink != null)
+                profile.setWebSiteLink(new URI(websiteLink.getAsString()).toURL());
+        }catch (IllegalArgumentException e){
+            throw new UnprocessableEntityException("Invalid URL!");
+        }
+
+        //Updating database
+        db.ready();
+        db.getSession().merge(user);
+        db.done();
+
+        //Returning updated profile
+        return new Response(profile.toJson(), Response.OK);
     }
 }
