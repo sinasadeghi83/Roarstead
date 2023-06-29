@@ -39,9 +39,8 @@ public class HttpListener {
         if(defaultRoleCount == 0) {
             db.ready();
             Role role = new Role();
-            role.setId(1);
             role.setName(Role.DEFAULT_NAME);
-            db.getSession().saveOrUpdate(role);
+            db.getSession().persist(role);
             db.done();
         }
         db.closeSessionIfNotClosed();
