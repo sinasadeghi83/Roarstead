@@ -3,6 +3,7 @@ package com.roarstead.Components.Controller;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.roarstead.App;
+import com.roarstead.Components.Annotation.POST;
 import com.roarstead.Components.Exceptions.*;
 import com.roarstead.Components.Request.Request;
 import com.roarstead.Components.Response.Response;
@@ -23,11 +24,12 @@ public abstract class BaseController {
     }
     public BaseController(){
         init();
-        gson = new Gson();
+        gson = App.getCurrentApp().getGson();
     }
 
     public Response runAction(String action, String rawRequestBody) throws Exception {
-        Headers headers = App.getCurrentApp().getHttpExchange().getRequestHeaders();
+        HttpExchange exchange = App.getCurrentApp().getHttpExchange();
+        Headers headers = exchange.getRequestHeaders();
         JsonObject jsonBody = null;
         if(rawRequestBody != null)
             jsonBody = gson.fromJson(rawRequestBody, JsonObject.class);
@@ -45,9 +47,17 @@ public abstract class BaseController {
         try {
             if(jsonBody != null) {
                 method = this.getClass().getMethod(action, JsonObject.class);
+                if (exchange.getRequestMethod().equalsIgnoreCase("GET")
+                        && method.getDeclaredAnnotationsByType(POST.class).length > 0) {
+                    throw new MethodNotAllowedException();
+                }
                 return (Response) method.invoke(this, jsonBody);
             }else {
                 method = this.getClass().getMethod(action);
+                if (exchange.getRequestMethod().equalsIgnoreCase("GET")
+                        && method.getDeclaredAnnotationsByType(POST.class).length > 0) {
+                    throw new MethodNotAllowedException();
+                }
                 return (Response) method.invoke(this);
             }
         }catch (Exception e){

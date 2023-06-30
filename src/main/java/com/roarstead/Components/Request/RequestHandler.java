@@ -15,6 +15,8 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestHandler {
 
@@ -28,6 +30,7 @@ public class RequestHandler {
         HttpExchange exchange = App.getCurrentApp().getHttpExchange();
 
         String requestPath = exchange.getRequestURI().getPath();
+//        requestPath = requestPath.substring(0, requestPath.indexOf("?"));
         String[] pathParts = requestPath.split("/");
         String controllerName = pathParts[1];
         String actionName = pathParts.length > 2 ? pathParts[2] : "index";
@@ -49,20 +52,17 @@ public class RequestHandler {
         try {
             Headers headers = exchange.getRequestHeaders();
             String contentType = ((headers.get("Content-type") != null) ? (headers.get("Content-type").toString()) : (null));
+            long contentLength = ((headers.get("Content-length") != null) ? Long.parseLong(headers.get("Content-length").toString()) : (0));
             String rawBody = null;
             if(contentType != null && contentType.contains("multipart/form-data")) {
                 App.getCurrentApp().getResourceManager().retrieveDownloadedFiles();
-            }else {
+            }else if(contentLength > 0){
                 rawBody = new String(requestStream.readAllBytes(), StandardCharsets.UTF_8);
                 requestStream.close();
             }
             //Convert three specific not found related exceptions to their according HttpException
             try {
                 Class<? extends BaseController> controller = (Class<? extends BaseController>) Class.forName("com.roarstead.Controllers." + controllerName);
-                if (exchange.getRequestMethod().equalsIgnoreCase("GET")
-                        && controller.getMethod(actionName, JsonObject.class).getDeclaredAnnotationsByType(POST.class) != null) {
-                    throw new MethodNotAllowedException();
-                }
                 BaseController baseController = controller.getDeclaredConstructor().newInstance();
                 response = baseController.runAction(actionName, rawBody);
             }catch (ClassNotFoundException | NoSuchMethodException e) {
@@ -93,5 +93,21 @@ public class RequestHandler {
             builder.setCharAt(index, Character.toUpperCase(builder.charAt(index)));
         }
         return builder.toString();
+    }
+
+    public static Map<String, String> queryToMap(String query) {
+        if(query == null) {
+            return null;
+        }
+        Map<String, String> result = new HashMap<>();
+        for (String param : query.split("&")) {
+            String[] entry = param.split("=");
+            if (entry.length > 1) {
+                result.put(entry[0], entry[1]);
+            }else{
+                result.put(entry[0], "");
+            }
+        }
+        return result;
     }
 }
