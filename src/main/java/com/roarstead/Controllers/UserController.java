@@ -44,12 +44,34 @@ public class UserController extends BaseController {
                 "actionUpdateProfileHeader", List.of("@"),
                 "actionUpdateProfile", List.of("@"),
                 "actionSearch", List.of("@"),
-                "actionFollow", List.of("@")
+                "actionFollow", List.of("@"),
+                "actionUnfollow", List.of("@")
         );
     }
 
     public Response actionIndex(JsonObject requestBody) {
         return new Response("Yay! It works!", Response.OK);
+    }
+
+    //TODO: Creating PUT annotation
+    public Response actionUnfollow() throws HttpException {
+        Database db = App.getCurrentApp().getDb();
+
+        //Get following user
+        int followingId = Integer.parseInt(App.getCurrentApp().getQueryParams().get(FOLLOWING_ID_KEY));
+
+        //Gets logged in user
+        AuthManager authManager = App.getCurrentApp().getAuthManager();
+        User user = (User) authManager.identity();
+
+        //Remove from the followings
+        db.ready();
+        User following = user.removeFollowing(followingId);
+        db.getSession().merge(user);
+        db.done();
+
+        //Returns unfollowed user with OK response
+        return new Response(following, Response.OK);
     }
 
     //TODO: Creating PUT annotation

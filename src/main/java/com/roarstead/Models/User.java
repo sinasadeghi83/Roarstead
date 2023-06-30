@@ -207,4 +207,24 @@ public class User extends Auth {
         addFollowing(following);
         return following;
     }
+
+    public void removeFollowing(User following) throws BadRequestException {
+        if(following == null)
+            followings = new HashSet<>();
+        if(following == null || following.getId() == id || !followings.contains(following))
+            throw new BadRequestException(INVALID_USER_MESSAGE);
+        followings.remove(following);
+    }
+
+    public User removeFollowing(int followingId) throws NotFoundException, BadRequestException {
+        User following = App.getCurrentApp().getDb().getSession()
+                .createQuery("FROM User u WHERE u.id=:id", User.class)
+                .setParameter("id", followingId)
+                .getSingleResultOrNull();
+        //Throws exception if user does not exist
+        if(following == null)
+            throw new NotFoundException();
+        removeFollowing(following);
+        return following;
+    }
 }
