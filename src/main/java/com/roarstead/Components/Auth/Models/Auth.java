@@ -27,6 +27,7 @@ public abstract class Auth {
             joinColumns = @JoinColumn(name="auth_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @Exclude
     protected Set<Role> roles;
 
     public Auth(){

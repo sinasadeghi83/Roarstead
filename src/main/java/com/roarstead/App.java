@@ -20,6 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class App extends Thread {
     private final HttpExchange httpExchange;
@@ -93,5 +95,9 @@ public class App extends Thread {
 
     public ResourceManager getResourceManager() {
         return resourceManager;
+    }
+
+    public Map<String, String> getQueryParams(){
+        return RequestHandler.queryToMap(httpExchange.getRequestURI().getQuery());
     }
 }

@@ -28,10 +28,12 @@ public class Profile {
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "prof_img_id", referencedColumnName = "id")
+    @Exclude
     private Image profImage;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name="header_img_id", referencedColumnName = "id")
+    @Exclude
     private Image headerImage;
 
     @Column(name = "bio")
@@ -43,7 +45,7 @@ public class Profile {
     private String location;
 
     @Column(name = "url")
-    private URL webSiteLink;
+    private URL websiteLink;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", insertable = true, updatable = false)
@@ -111,12 +113,12 @@ public class Profile {
         this.location = location;
     }
 
-    public URL getWebSiteLink() {
-        return webSiteLink;
+    public URL getWebsiteLink() {
+        return websiteLink;
     }
 
-    public void setWebSiteLink(URL webSiteLink) {
-        this.webSiteLink = webSiteLink;
+    public void setWebsiteLink(URL websiteLink) {
+        this.websiteLink = websiteLink;
     }
 
     public void setCreatedAt(Date createdAt) {
@@ -157,7 +159,7 @@ public class Profile {
         JsonObject result = new JsonObject();
         result.addProperty("bio", bio);
         result.addProperty("location", location);
-        result.addProperty("url", webSiteLink != null ? webSiteLink.toString() : null);
+        result.addProperty("url", websiteLink != null ? websiteLink.toString() : null);
         result.addProperty("created_at", createdAt.toString());
 
         return result;

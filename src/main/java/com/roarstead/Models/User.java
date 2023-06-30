@@ -1,21 +1,27 @@
 package com.roarstead.Models;
 
 import com.google.gson.annotations.SerializedName;
+import com.roarstead.App;
 import com.roarstead.Components.Annotation.Exclude;
 import com.roarstead.Components.Auth.Models.Auth;
 import com.roarstead.Components.Business.Models.Country;
+import com.roarstead.Components.Exceptions.BadRequestException;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
+import com.roarstead.Components.Exceptions.NotFoundException;
 import jakarta.persistence.Column;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
 public class User extends Auth {
 
+    private static final String INVALID_USER_MESSAGE = "Invalid User";
     @Column(name = "first_name", nullable = false)
     @SerializedName("first_name")
     private String firstName;
@@ -24,11 +30,15 @@ public class User extends Auth {
     @SerializedName("last_name")
     private String lastName;
 
+    @Exclude
     @Column(unique = true)
     private String email;     //unique and formatting
+
+    @Exclude
     @Column(unique = true)
     private String phone;
 
+    @Exclude
     @Embedded
     private Country country;
 
@@ -39,6 +49,19 @@ public class User extends Auth {
 
     @Embedded
     private Profile profile;
+
+    @Exclude
+    @ManyToMany
+    @JoinTable(
+            name = "following",
+            joinColumns = @JoinColumn(name="follower_id"),
+            inverseJoinColumns = @JoinColumn(name="following_id")
+    )
+    Set<User> followings;
+
+    @Exclude
+    @ManyToMany(mappedBy = "followings")
+    Set<User> followers;
 
 //    @ManyToMany
 //    @JoinTable(name = "roar_like", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "roar-id"))
@@ -143,5 +166,69 @@ public class User extends Auth {
 
     public void setProfile(Profile profile) {
         this.profile = profile;
+    }
+
+    public Set<User> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Set<User> followers) {
+        this.followers = followers;
+    }
+
+    public void addFollower(User follower){
+        if(followers == null)
+            followers = new HashSet<>();
+        followers.add(follower);
+    }
+
+    public Set<User> getFollowings() {
+        return followings;
+    }
+
+    public void setFollowings(Set<User> followings) {
+        this.followings = followings;
+    }
+
+    public void addFollowing(User following) throws BadRequestException {
+        if(following == null)
+            followings = new HashSet<>();
+        if(following == null || following.getId() == id)
+            throw new BadRequestException(INVALID_USER_MESSAGE);
+        followings.add(following);
+    }
+
+    //Add user with id = followingId to the following list of the logged-in user
+    //Returns followed user
+    public User addFollowing(int followingId) throws NotFoundException, BadRequestException {
+        User following = App.getCurrentApp().getDb().getSession()
+                .createQuery("FROM User u WHERE u.id=:id", User.class)
+                .setParameter("id", followingId)
+                .getSingleResultOrNull();
+        //Throws exception if user does not exist
+        if(following == null)
+            throw new NotFoundException();
+        addFollowing(following);
+        return following;
+    }
+
+    public void removeFollowing(User following) throws BadRequestException {
+        if(following == null)
+            followings = new HashSet<>();
+        if(following == null || following.getId() == id || !followings.contains(following))
+            throw new BadRequestException(INVALID_USER_MESSAGE);
+        followings.remove(following);
+    }
+
+    public User removeFollowing(int followingId) throws NotFoundException, BadRequestException {
+        User following = App.getCurrentApp().getDb().getSession()
+                .createQuery("FROM User u WHERE u.id=:id", User.class)
+                .setParameter("id", followingId)
+                .getSingleResultOrNull();
+        //Throws exception if user does not exist
+        if(following == null)
+            throw new NotFoundException();
+        removeFollowing(following);
+        return following;
     }
 }
