@@ -21,6 +21,7 @@ import com.roarstead.Models.UserForm;
 import jakarta.validation.ConstraintViolation;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,9 @@ public class UserController extends BaseController {
 
     @Override
     public Map<String, List<String>> accessControl() {
-        return Map.of(
+        Map<String, List<String>> result = new HashMap<>();
+
+        result.putAll(Map.of(
                 "actionIndex", List.of(),
                 "actionSignUp", List.of("?"),
                 "actionGetToken", List.of("?"),
@@ -46,11 +49,30 @@ public class UserController extends BaseController {
                 "actionFollow", List.of("@"),
                 "actionUnfollow", List.of("@"),
                 "actionDoesFollow", List.of("@")
-        );
+        ));
+
+        result.putAll(Map.of(
+                "actionGetFollowings", List.of("@")
+        ));
+
+        return result;
     }
 
     public Response actionIndex(JsonObject requestBody) {
         return new Response("Yay! It works!", Response.OK);
+    }
+
+    public Response actionGetFollowings() throws Exception{
+        Database db = App.getCurrentApp().getDb();
+
+        Pagination<User> userPagination = new Pagination<>(App.getCurrentApp().getQueryParams());
+        String queryString = "SELECT f FROM User u JOIN u.followings f WHERE u.id=:userId";
+        String countQueryString = "SELECT COUNT(f) FROM User u JOIN u.followings f WHERE u.id=:userId";
+        Map<String, Object> queryParams = Map.of("userId", App.getCurrentApp().getAuthManager().getUserId());
+        userPagination.setQuery(queryString, queryParams);
+        userPagination.setCountQuery(countQueryString, queryParams);
+
+        return new Response(userPagination.getJsonResult(), Response.OK);
     }
 
     public Response actionDoesFollow() throws Exception{
