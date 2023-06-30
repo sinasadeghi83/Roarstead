@@ -65,8 +65,7 @@ public class UserController extends BaseController {
                 "u.username LIKE CONCAT('%', :username, '%')";
         pagination.setQuery(queryString, queryParams);
         pagination.setCountQuery("SELECT count(u.id) " + queryString, queryParams);
-        List<User> result = pagination.getList();
-        return new Response(result, Response.OK);
+        return new Response(pagination.getJsonResult(), Response.OK);
     }
 
     @POST
