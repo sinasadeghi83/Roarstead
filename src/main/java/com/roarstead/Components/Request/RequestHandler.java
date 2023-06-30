@@ -52,7 +52,7 @@ public class RequestHandler {
         try {
             Headers headers = exchange.getRequestHeaders();
             String contentType = ((headers.get("Content-type") != null) ? (headers.get("Content-type").toString()) : (null));
-            long contentLength = ((headers.get("Content-length") != null) ? Long.parseLong(headers.get("Content-length").toString()) : (0));
+            long contentLength = ((headers.get("Content-length") != null) ? Long.parseLong(headers.get("Content-length").get(0)) : (0));
             String rawBody = null;
             if(contentType != null && contentType.contains("multipart/form-data")) {
                 App.getCurrentApp().getResourceManager().retrieveDownloadedFiles();
@@ -68,6 +68,8 @@ public class RequestHandler {
             }catch (ClassNotFoundException | NoSuchMethodException e) {
                 throw new NotFoundException();
             }catch (NullPointerException e) {
+                e.printStackTrace();
+                System.err.println(e.getMessage());
                 throw new BadRequestException();
             }
         } catch (HttpException e){
