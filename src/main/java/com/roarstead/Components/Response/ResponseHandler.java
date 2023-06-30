@@ -15,7 +15,7 @@ public class ResponseHandler {
             HttpExchange exchange = App.getCurrentApp().getHttpExchange();
             String rawResponse = "";
             switch (contentType){
-                case JSON_CONTENT -> rawResponse = new Gson().toJson(response);
+                case JSON_CONTENT -> rawResponse = App.getCurrentApp().getGson().toJson(response);
             }
             byte[] bytesResponse = rawResponse.getBytes();
             exchange.getResponseHeaders().set("Content-Type", contentType);
