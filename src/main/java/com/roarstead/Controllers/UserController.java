@@ -52,7 +52,8 @@ public class UserController extends BaseController {
         ));
 
         result.putAll(Map.of(
-                "actionGetFollowings", List.of("@")
+                "actionGetFollowings", List.of("@"),
+                "actionGetFollowers", List.of("@")
         ));
 
         return result;
@@ -60,6 +61,19 @@ public class UserController extends BaseController {
 
     public Response actionIndex(JsonObject requestBody) {
         return new Response("Yay! It works!", Response.OK);
+    }
+
+    public Response actionGetFollowers() throws Exception{
+        Database db = App.getCurrentApp().getDb();
+
+        Pagination<User> userPagination = new Pagination<>(App.getCurrentApp().getQueryParams());
+        String queryString = "SELECT f FROM User u JOIN u.followers f WHERE u.id=:userId";
+        String countQueryString = "SELECT COUNT(f) FROM User u JOIN u.followers f WHERE u.id=:userId";
+        Map<String, Object> queryParams = Map.of("userId", App.getCurrentApp().getAuthManager().getUserId());
+        userPagination.setQuery(queryString, queryParams);
+        userPagination.setCountQuery(countQueryString, queryParams);
+
+        return new Response(userPagination.getJsonResult(), Response.OK);
     }
 
     public Response actionGetFollowings() throws Exception{
