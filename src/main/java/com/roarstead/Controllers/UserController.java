@@ -19,11 +19,8 @@ import com.roarstead.Models.ProfileForm;
 import com.roarstead.Models.User;
 import com.roarstead.Models.UserForm;
 import jakarta.validation.ConstraintViolation;
-import org.hibernate.query.Query;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +30,8 @@ public class UserController extends BaseController {
     private static final String USER_ALREADY_SIGNED_UP = "There's already an account with this username or email or phone number";
     private static final String SEARCH_QUERY_KEY = "query";
     private static final String FOLLOWING_ID_KEY = "following_id";
+    private static final String DOES_FOLLOW_KEY = "does_follow";
+    private static final String REQUESTED_USER_ID = "requested_user_id";
 
     @Override
     public Map<String, List<String>> accessControl() {
@@ -45,7 +44,8 @@ public class UserController extends BaseController {
                 "actionUpdateProfile", List.of("@"),
                 "actionSearch", List.of("@"),
                 "actionFollow", List.of("@"),
-                "actionUnfollow", List.of("@")
+                "actionUnfollow", List.of("@"),
+                "actionDoesFollow", List.of("@")
         );
     }
 
@@ -53,8 +53,22 @@ public class UserController extends BaseController {
         return new Response("Yay! It works!", Response.OK);
     }
 
+    public Response actionDoesFollow() throws Exception{
+        Database db = App.getCurrentApp().getDb();
+        //Get request user id to check
+        int requestedId = Integer.parseInt(App.getCurrentApp().getQueryParams().get(REQUESTED_USER_ID));
+
+        long result = db.getSession()
+                .createQuery("SELECT count(u.id) FROM User u JOIN u.followings f WHERE u.id=:userId AND f.id =:requestedId", Long.class)
+                .setParameter("requestedId", requestedId)
+                .setParameter("userId", App.getCurrentApp().getAuthManager().getUserId())
+                .getSingleResult();
+
+        return new Response(Map.of(DOES_FOLLOW_KEY, result > 0), Response.OK);
+    }
+
     //TODO: Creating PUT annotation
-    public Response actionUnfollow() throws HttpException {
+    public Response actionUnfollow() throws Exception {
         Database db = App.getCurrentApp().getDb();
 
         //Get following user
@@ -75,7 +89,7 @@ public class UserController extends BaseController {
     }
 
     //TODO: Creating PUT annotation
-    public Response actionFollow() throws HttpException {
+    public Response actionFollow() throws Exception {
         Database db = App.getCurrentApp().getDb();
 
         //Get following user
@@ -95,7 +109,7 @@ public class UserController extends BaseController {
         return new Response(following, Response.OK);
     }
 
-    public Response actionSearch() throws NotFoundException {
+    public Response actionSearch() throws Exception {
         Map<String, String> params = App.getCurrentApp().getQueryParams();
         String searchQuery = params.get(SEARCH_QUERY_KEY);
         Pagination<User> pagination = new Pagination<>(params);
@@ -114,7 +128,7 @@ public class UserController extends BaseController {
     }
 
     @POST
-    public Response actionSignUp(JsonObject requestBody) throws HttpException {
+    public Response actionSignUp(JsonObject requestBody) throws Exception {
         Gson gson = App.getCurrentApp().getGson();
         UserForm userForm;
         userForm = gson.fromJson(requestBody, UserForm.class);
@@ -150,7 +164,7 @@ public class UserController extends BaseController {
     }
 
     @POST
-    public Response actionGetToken(JsonObject requestBody) throws InvalidCredentialsException {
+    public Response actionGetToken(JsonObject requestBody) throws Exception {
         AuthManager authManager = App.getCurrentApp().getAuthManager();
         authManager.authenticate(requestBody.get("username").getAsString(), requestBody.get("password").getAsString());
         String token = authManager.generateJWT();
@@ -256,7 +270,7 @@ public class UserController extends BaseController {
 
     //TODO: make a PATCH annotation
     @POST
-    public Response actionUpdateProfile(JsonObject jsonObject) throws NotAuthenticatedException, MalformedURLException, URISyntaxException, UnprocessableEntityException {
+    public Response actionUpdateProfile(JsonObject jsonObject) throws Exception {
         Database db = App.getCurrentApp().getDb();
 
         //Get user profile
