@@ -1,7 +1,6 @@
 package com.roarstead.Controllers;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.roarstead.App;
 import com.roarstead.Components.Annotation.POST;
@@ -19,11 +18,11 @@ import com.roarstead.Models.ProfileForm;
 import com.roarstead.Models.User;
 import com.roarstead.Models.UserForm;
 import jakarta.validation.ConstraintViolation;
+import org.hibernate.query.Query;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +30,7 @@ import java.util.Set;
 public class UserController extends BaseController {
 
     private static final String USER_ALREADY_SIGNED_UP = "There's already an account with this username or email or phone number";
+    private static final String SEARCH_QUERY_KEY = "query";
 
     @Override
     public Map<String, List<String>> accessControl() {
@@ -40,12 +40,32 @@ public class UserController extends BaseController {
                 "actionGetToken", List.of("?"),
                 "actionUpdateProfileImage", List.of("@"),
                 "actionUpdateProfileHeader", List.of("@"),
-                "actionUpdateProfile", List.of("@")
+                "actionUpdateProfile", List.of("@"),
+                "actionSearch", List.of("@")
         );
     }
 
     public Response actionIndex(JsonObject requestBody) {
         return new Response("Yay! It works!", Response.OK);
+    }
+
+    public Response actionSearch(){
+        String searchQuery = App.getCurrentApp().getQueryParams().get(SEARCH_QUERY_KEY);
+
+        Database db = App.getCurrentApp().getDb();
+
+        Query<User> query = db.getSession()
+                .createQuery("FROM User u WHERE " +
+                        "u.firstName LIKE CONCAT('%', :firstName, '%') OR " +
+                        "u.lastName LIKE CONCAT('%', :lastName, '%') OR " +
+                        "u.username LIKE CONCAT('%', :username, '%')", User.class)
+                .setParameter("firstName", searchQuery)
+                .setParameter("lastName", searchQuery)
+                .setParameter("username", searchQuery);
+
+        List<User> result = query.getResultList();
+
+        return new Response(result, Response.OK);
     }
 
     @POST
@@ -221,7 +241,7 @@ public class UserController extends BaseController {
             profile.setLocation(profileForm.getLocation());
 
         if(profileForm.getWebsiteLink() != null)
-            profile.setWebSiteLink(new URI(profileForm.getWebsiteLink()).toURL());
+            profile.setWebsiteLink(new URI(profileForm.getWebsiteLink()).toURL());
 
         //Updating database
         db.ready();
