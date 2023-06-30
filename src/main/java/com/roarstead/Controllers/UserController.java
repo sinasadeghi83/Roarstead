@@ -33,6 +33,8 @@ public class UserController extends BaseController {
     private static final String FOLLOWING_ID_KEY = "following_id";
     private static final String DOES_FOLLOW_KEY = "does_follow";
     private static final String REQUESTED_USER_ID = "requested_user_id";
+    private static final String JWT_TOKEN_KEY = "token";
+    private static final String USER_KEY = "user";
 
     @Override
     public Map<String, List<String>> accessControl() {
@@ -189,14 +191,14 @@ public class UserController extends BaseController {
         db.ready();
         User user = new User(userForm.getUsername(), userForm.getFirstName(), userForm.getLastName(), userForm.getEmail(), userForm.getPhone(), Country.getCountryByDialCode(userForm.getDialCode()), userForm.getPassword(), userForm.getBirthDate());
         user.setProfile(new Profile());
-        db.getSession().save(user);
+        db.getSession().persist(user);
         db.done();
         App.getCurrentApp().getAuthManager().assignRole(user, Role.findRoleByName(Role.DEFAULT_NAME));
-        JsonObject userRaw = (JsonObject) gson.toJsonTree(userForm);
-        userRaw.addProperty("id", user.getId());
-        userRaw.addProperty("country", user.getCountry().getName());
-        userRaw.add("created_at", gson.toJsonTree(user.getProfile().getCreatedAt()));
-        return new Response(userRaw, Response.OK);
+        JsonObject userJson = (JsonObject) gson.toJsonTree(user);
+        userJson.addProperty("phone", user.getPhone());
+        userJson.addProperty("email", user.getEmail());
+        userJson.add("country", gson.toJsonTree(user.getCountry()));
+        return new Response(userJson, Response.OK);
     }
 
     @POST
@@ -204,7 +206,14 @@ public class UserController extends BaseController {
         AuthManager authManager = App.getCurrentApp().getAuthManager();
         authManager.authenticate(requestBody.get("username").getAsString(), requestBody.get("password").getAsString());
         String token = authManager.generateJWT();
-        JsonObject responseBody = App.getCurrentApp().getGson().fromJson("{\"token\":\"" + token + "\"}", JsonObject.class);
+        Map<String, Object> responseBody = new HashMap<>();
+        User user = (User) authManager.identity();
+        JsonObject userJson = (JsonObject) gson.toJsonTree(user);
+        userJson.addProperty("phone", user.getPhone());
+        userJson.addProperty("email", user.getEmail());
+        userJson.add("country", gson.toJsonTree(user.getCountry()));
+        responseBody.put(JWT_TOKEN_KEY, token);
+        responseBody.put(USER_KEY, userJson);
         return new Response(responseBody, Response.OK);
     }
 
