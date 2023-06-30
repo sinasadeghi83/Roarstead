@@ -32,6 +32,7 @@ public class UserController extends BaseController {
 
     private static final String USER_ALREADY_SIGNED_UP = "There's already an account with this username or email or phone number";
     private static final String SEARCH_QUERY_KEY = "query";
+    private static final String FOLLOWING_ID_KEY = "following_id";
 
     @Override
     public Map<String, List<String>> accessControl() {
@@ -42,12 +43,34 @@ public class UserController extends BaseController {
                 "actionUpdateProfileImage", List.of("@"),
                 "actionUpdateProfileHeader", List.of("@"),
                 "actionUpdateProfile", List.of("@"),
-                "actionSearch", List.of("@")
+                "actionSearch", List.of("@"),
+                "actionFollow", List.of("@")
         );
     }
 
     public Response actionIndex(JsonObject requestBody) {
         return new Response("Yay! It works!", Response.OK);
+    }
+
+    //TODO: Creating PUT annotation
+    public Response actionFollow() throws HttpException {
+        Database db = App.getCurrentApp().getDb();
+
+        //Get following user
+        int followingId = Integer.parseInt(App.getCurrentApp().getQueryParams().get(FOLLOWING_ID_KEY));
+
+        //Gets logged in user
+        AuthManager authManager = App.getCurrentApp().getAuthManager();
+        User user = (User) authManager.identity();
+
+        //Add to the followings
+        db.ready();
+        User following = user.addFollowing(followingId);
+        db.getSession().merge(user);
+        db.done();
+
+        //Returns followed user with OK response
+        return new Response(following, Response.OK);
     }
 
     public Response actionSearch() throws NotFoundException {
@@ -209,7 +232,7 @@ public class UserController extends BaseController {
         return new Response(Response.OK_UPLOAD, Response.OK);
     }
 
-    //TODO: make a PUT annotation
+    //TODO: make a PATCH annotation
     @POST
     public Response actionUpdateProfile(JsonObject jsonObject) throws NotAuthenticatedException, MalformedURLException, URISyntaxException, UnprocessableEntityException {
         Database db = App.getCurrentApp().getDb();
