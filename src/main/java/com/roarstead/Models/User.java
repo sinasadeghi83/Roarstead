@@ -30,11 +30,15 @@ public class User extends Auth {
     @SerializedName("last_name")
     private String lastName;
 
+    @Exclude
     @Column(unique = true)
     private String email;     //unique and formatting
+
+    @Exclude
     @Column(unique = true)
     private String phone;
 
+    @Exclude
     @Embedded
     private Country country;
 
