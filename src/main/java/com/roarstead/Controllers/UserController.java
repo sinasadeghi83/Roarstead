@@ -12,6 +12,7 @@ import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Exceptions.*;
 import com.roarstead.Components.Resource.Models.Image;
 import com.roarstead.Components.Resource.ResourceManager;
+import com.roarstead.Components.Response.Pagination;
 import com.roarstead.Components.Response.Response;
 import com.roarstead.Models.Profile;
 import com.roarstead.Models.ProfileForm;
@@ -49,22 +50,22 @@ public class UserController extends BaseController {
         return new Response("Yay! It works!", Response.OK);
     }
 
-    public Response actionSearch(){
-        String searchQuery = App.getCurrentApp().getQueryParams().get(SEARCH_QUERY_KEY);
-
-        Database db = App.getCurrentApp().getDb();
-
-        Query<User> query = db.getSession()
-                .createQuery("FROM User u WHERE " +
-                        "u.firstName LIKE CONCAT('%', :firstName, '%') OR " +
-                        "u.lastName LIKE CONCAT('%', :lastName, '%') OR " +
-                        "u.username LIKE CONCAT('%', :username, '%')", User.class)
-                .setParameter("firstName", searchQuery)
-                .setParameter("lastName", searchQuery)
-                .setParameter("username", searchQuery);
-
-        List<User> result = query.getResultList();
-
+    public Response actionSearch() throws NotFoundException {
+        Map<String, String> params = App.getCurrentApp().getQueryParams();
+        String searchQuery = params.get(SEARCH_QUERY_KEY);
+        Pagination<User> pagination = new Pagination<>(params);
+        Map<String, Object> queryParams = Map.of(
+                "firstName", searchQuery,
+                "lastName", searchQuery,
+                "username", searchQuery
+        );
+        String queryString = "FROM User u WHERE " +
+                "u.firstName LIKE CONCAT('%', :firstName, '%') OR " +
+                "u.lastName LIKE CONCAT('%', :lastName, '%') OR " +
+                "u.username LIKE CONCAT('%', :username, '%')";
+        pagination.setQuery(queryString, queryParams);
+        pagination.setCountQuery("SELECT count(u.id) " + queryString, queryParams);
+        List<User> result = pagination.getList();
         return new Response(result, Response.OK);
     }
 
