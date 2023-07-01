@@ -241,8 +241,6 @@ public class User extends Auth {
     }
 
     public void removeFollowing(User following) throws BadRequestException {
-        if(following == null)
-            followings = new HashSet<>();
         if(following == null || following.getId() == id)
             throw new BadRequestException(INVALID_USER_MESSAGE);
         followings.remove(following);
@@ -258,6 +256,25 @@ public class User extends Auth {
             throw new NotFoundException();
         removeFollowing(following);
         return following;
+    }
+
+    public User unblockUser(int blockedUserId) throws Exception {
+        User blockedUser = App.getCurrentApp().getDb().getSession()
+                .createQuery("FROM User u WHERE u.id=:id", User.class)
+                .setParameter("id", blockedUserId)
+                .getSingleResultOrNull();
+        //Throws exception if user does not exist
+        if(blockedUser == null)
+            throw new NotFoundException();
+        unblockUser(blockedUser);
+        return blockedUser;
+    }
+
+    public void unblockUser(User blockedUser) throws Exception {
+        if(blockedUser == null || blockedUser.getId() == id)
+            throw new BadRequestException(INVALID_USER_MESSAGE);
+
+        blacklist.remove(blockedUser);
     }
 
     public User blockUser(int userId) throws Exception{
