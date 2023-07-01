@@ -26,6 +26,7 @@ public class RoarController extends BaseController {
     private static final String REROARED_ID_KEY = "reroared_id";
     private static final String REROARING_SELF_ERR = "You can't Reroar yourself!";
     private static final String QUOTED_ROAR_KEY = "quoted_roar_id";
+    private static final String REPLY_TO_KEY = "reply_to";
 
     @Override
     public Map<String, List<String>> accessControl() {
@@ -51,8 +52,13 @@ public class RoarController extends BaseController {
         User user = (User) App.getCurrentApp().getAuthManager().identity();
         GRoarForm roarForm = gson.fromJson(requestBody, GRoarForm.class);
 
+        GRoar replyTo = db.getSession()
+                .createQuery("FROM GRoar WHERE id=:id", GRoar.class)
+                .setParameter("id", roarForm.getReplyTo())
+                .getSingleResultOrNull();
+
         db.ready();
-        QRoar qroar = new QRoar(user, roarForm.getText(), quotedRoar);
+        QRoar qroar = new QRoar(user, roarForm.getText(), replyTo, quotedRoar);
         db.getSession().persist(qroar);
         db.done();
 
@@ -90,9 +96,11 @@ public class RoarController extends BaseController {
         RoarMedia.MediaType mediaType = RoarMedia.MediaType.IMAGE;
         String altText = null;
         int groarId = 0;
+        int replyToId = 0;
         if(params != null) {
             altText = params.get(ALT_TEXT_KEY);
             groarId = Integer.parseInt(params.get(GROAR_ID_KEY) == null ? "0" : params.get(GROAR_ID_KEY));
+            replyToId = Integer.parseInt(params.get(REPLY_TO_KEY) == null ? "0" : params.get(REPLY_TO_KEY));
         }
 
         //Retrieve image
@@ -110,13 +118,18 @@ public class RoarController extends BaseController {
 
         User user = (User) App.getCurrentApp().getAuthManager().identity();
 
+        GRoar replyTo = db.getSession()
+                .createQuery("FROM GRoar WHERE id=:id", GRoar.class)
+                .setParameter("id", replyToId)
+                .getSingleResultOrNull();
+
         GRoar roar = App.getCurrentApp().getDb().getSession()
                 .createQuery("FROM GRoar WHERE id=:id", GRoar.class)
                 .setParameter("id", groarId)
                 .getSingleResultOrNull();
         if(roar == null) {
             db.ready();
-            roar = new GRoar(user, null);
+            roar = new GRoar(user, null, replyTo);
             db.getSession().persist(roar);
             db.done();
         }
@@ -137,8 +150,13 @@ public class RoarController extends BaseController {
         User user = (User) App.getCurrentApp().getAuthManager().identity();
         GRoarForm roarForm = gson.fromJson(requestBody, GRoarForm.class);
 
+        GRoar replyTo = db.getSession()
+                .createQuery("FROM GRoar WHERE id=:id", GRoar.class)
+                        .setParameter("id", roarForm.getReplyTo())
+                                .getSingleResultOrNull();
+
         db.ready();
-        GRoar gRoar = new GRoar(user, roarForm.getText());
+        GRoar gRoar = new GRoar(user, roarForm.getText(), replyTo);
         db.getSession().persist(gRoar);
         db.done();
 
