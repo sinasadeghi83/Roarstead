@@ -33,7 +33,6 @@
         <mapping class="com.roarstead.Models.Reroar"/>
         <mapping class="com.roarstead.Models.QRoar"/>
         <mapping class="com.roarstead.Models.RoarMedia"/>
-<!--        <mapping class="com.roarstead.Models.Roar"/>-->
-<!--        <mapping class="com.roarstead.Models.ReRoar"/>-->
+        <mapping class="com.roarstead.Models.Hashtag"/>
     </session-factory>
 </hibernate-configuration>
