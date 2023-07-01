@@ -9,13 +9,19 @@ import java.io.OutputStream;
 
 public class ResponseHandler {
     public static final String JSON_CONTENT = "application/json";
+    public static final String PNG_CONTENT = "image/png";
+    public static final String JPEG_CONTENT = "image/jpeg";
 
-    public void respond(Response response, String contentType) {
+    public void respond(Response response) {
         try {
+            String contentType = response.getContentType();
             HttpExchange exchange = App.getCurrentApp().getHttpExchange();
             String rawResponse = "";
             switch (contentType){
                 case JSON_CONTENT -> rawResponse = App.getCurrentApp().getGson().toJson(response);
+                //Send media as base64
+                case PNG_CONTENT -> rawResponse = (String) response.getMessage();
+                case JPEG_CONTENT -> rawResponse = (String) response.getMessage();
             }
             byte[] bytesResponse = rawResponse.getBytes();
             exchange.getResponseHeaders().set("Content-Type", contentType);

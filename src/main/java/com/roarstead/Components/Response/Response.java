@@ -25,16 +25,39 @@ public class Response {
 
     private Object message;
     private int code;
+    private String contentType;
 
     public Response(Object message, int code) {
         this.message = message;
         this.code = code;
+        contentType = ResponseHandler.JSON_CONTENT;
     }
+
+    public Response(Object message, int code, String contentType) {
+        this.message = message;
+        this.code = code;
+        this.contentType = contentType;
+    }
+
+    public Response(Object message, String contentType) {
+        this.message = message;
+        this.code = Response.OK;
+        this.contentType = contentType;
+    }
+
     public Object getMessage() {
         return message;
     }
 
     public int getCode() {
         return code;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 }
