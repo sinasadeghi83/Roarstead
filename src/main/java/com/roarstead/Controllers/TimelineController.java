@@ -24,7 +24,7 @@ public class TimelineController extends BaseController {
         Database db = App.getCurrentApp().getDb();
 
         List<Roar> roars = db.getSession()
-                .createQuery("FROM Roar r WHERE r.sender IN (:followings)", Roar.class)
+                .createQuery("FROM Roar r WHERE r.sender IN (:followings) ORDER BY r.createdAt DESC", Roar.class)
                 .setParameterList("followings", user.getFollowings())
                 .getResultList();
 
