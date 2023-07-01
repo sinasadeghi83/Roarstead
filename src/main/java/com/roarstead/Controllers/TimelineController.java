@@ -35,10 +35,12 @@ public class TimelineController extends BaseController {
             throw new BadRequestException();
 
         Database db = App.getCurrentApp().getDb();
+        User user = (User) App.getCurrentApp().getAuthManager().identity();
 
         List<Roar> roars = db.getSession()
-                .createQuery("FROM Roar r JOIN r.hashtags h WHERE h.name=:hashtagName", Roar.class)
+                .createQuery("FROM Roar r JOIN r.hashtags h WHERE h.name=:hashtagName AND NOT (r.sender IN (:blockedByUsers)) ORDER BY r.createdAt DESC", Roar.class)
                 .setParameter("hashtagName", hashtagName)
+                .setParameterList("blockedByUsers", user.getBlockedByList())
                 .getResultList();
 
         return new Response(roars, Response.OK);
@@ -54,9 +56,10 @@ public class TimelineController extends BaseController {
                 .getResultList();
 
         List<Roar> roars = db.getSession()
-                .createQuery("FROM Roar r WHERE r.sender IN (:followings) OR r.id IN (:favStars) ORDER BY r.createdAt DESC", Roar.class)
+                .createQuery("FROM Roar r WHERE r.sender IN (:followings) OR r.id IN (:favStars) AND NOT (r.sender IN (:blockedByUsers)) ORDER BY r.createdAt DESC", Roar.class)
                 .setParameterList("followings", user.getFollowings())
                 .setParameterList("favStars", favStars)
+                .setParameterList("blockedByUsers", user.getBlockedByList())
                 .getResultList();
 
         return new Response(roars, Response.OK);

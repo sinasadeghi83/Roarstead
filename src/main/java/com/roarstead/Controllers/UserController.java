@@ -35,6 +35,7 @@ public class UserController extends BaseController {
     private static final String REQUESTED_USER_ID = "requested_user_id";
     private static final String JWT_TOKEN_KEY = "token";
     private static final String USER_KEY = "user";
+    private static final String BLOCKING_USER_ID = "blocking_user_id";
 
     @Override
     public Map<String, List<String>> accessControl() {
@@ -55,7 +56,8 @@ public class UserController extends BaseController {
 
         result.putAll(Map.of(
                 "actionGetFollowings", List.of("@"),
-                "actionGetFollowers", List.of("@")
+                "actionGetFollowers", List.of("@"),
+                "actionBlock", List.of("@")
         ));
 
         return result;
@@ -63,6 +65,22 @@ public class UserController extends BaseController {
 
     public Response actionIndex(JsonObject requestBody) {
         return new Response("Yay! It works!", Response.OK);
+    }
+
+    // TODO: Creating put annotation
+    public Response actionBlock() throws Exception{
+        Map<String, String> params = App.getCurrentApp().getQueryParams();
+        int blockingUserId = Integer.parseInt(params.get(BLOCKING_USER_ID));
+
+        Database db = App.getCurrentApp().getDb();
+        User user = (User) App.getCurrentApp().getAuthManager().identity();
+
+        db.ready();
+        User blockedUser = user.blockUser(blockingUserId);
+        db.getSession().merge(user);
+        db.done();
+
+        return new Response(blockedUser, Response.OK);
     }
 
     public Response actionGetFollowers() throws Exception{
