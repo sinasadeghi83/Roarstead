@@ -2,6 +2,7 @@ package com.roarstead.Components.Resource;
 
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.Files;
+import com.google.common.net.MediaType;
 import com.roarstead.App;
 import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Exceptions.BadRequestException;
@@ -9,6 +10,7 @@ import com.roarstead.Components.Exceptions.FileModelIsNotAnImageException;
 import com.roarstead.Components.Exceptions.UnprocessableEntityException;
 import com.roarstead.Components.Resource.Models.FileModel;
 import com.roarstead.Components.Resource.Models.Image;
+import com.roarstead.Components.Resource.Models.Media;
 import com.sun.net.httpserver.HttpExchange;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.RequestContext;
@@ -18,6 +20,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 import java.util.Random;
@@ -116,16 +119,26 @@ public class ResourceManager {
         return image;
     }
 
-    public String convertImageToBase64(Image image) throws Exception {
-        if(image == null)
+    public String convertMediaToBase64(Media media) throws Exception {
+        if(media == null)
             return "";
-        File file = image.getFileModel().getFile();
+        File file = media.getFileModel().getFile();
         if (file.exists()) {
             byte[] fileContent = Files.toByteArray(file);
             return BaseEncoding.base64().encode(fileContent);
         } else {
             return "";
         }
+    }
+
+    public String getMediaMIMEType(Media media) throws Exception{
+        File file = media.getFileModel().getFile();
+
+        Path filePath = file.toPath();
+        String mimeType = java.nio.file.Files.probeContentType(filePath);
+
+        MediaType mediaType = MediaType.parse(mimeType);
+        return mediaType.toString();
     }
 
     class HttpHandlerRequestContext implements RequestContext{
