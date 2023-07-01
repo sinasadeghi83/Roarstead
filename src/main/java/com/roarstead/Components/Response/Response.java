@@ -1,5 +1,9 @@
 package com.roarstead.Components.Response;
 
+import com.roarstead.Components.Annotation.Exclude;
+
+import java.util.Set;
+
 public class Response {
     public static final String NOT_FOUND_MSG = "404 Not found";
     public static final String INTERNAL_ERROR_MSG = "500 Server internal error. Contact the server admin.";
@@ -26,15 +30,46 @@ public class Response {
     private Object message;
     private int code;
 
+    @Exclude
+    private String contentType;
+
     public Response(Object message, int code) {
         this.message = message;
         this.code = code;
+        contentType = ResponseHandler.JSON_CONTENT;
     }
+
+    public Response(Object message, int code, String contentType) {
+        this.message = message;
+        this.code = code;
+        this.contentType = contentType;
+    }
+
+    public Response(Object message, String contentType) {
+        this.message = message;
+        this.code = Response.OK;
+        this.contentType = contentType;
+    }
+
+    public Response(Object message) {
+        this.message = message;
+        this.code = Response.OK;
+        contentType = ResponseHandler.JSON_CONTENT;
+    }
+
     public Object getMessage() {
         return message;
     }
 
     public int getCode() {
         return code;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 }

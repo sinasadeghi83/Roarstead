@@ -54,4 +54,8 @@ public abstract class Media {
     public void setId(int id) {
         this.id = id;
     }
+
+    public String getExtension() {
+        return fileModel.getExtension();
+    }
 }

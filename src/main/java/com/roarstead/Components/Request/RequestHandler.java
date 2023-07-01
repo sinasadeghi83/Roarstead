@@ -83,7 +83,7 @@ public class RequestHandler {
             causeException.printStackTrace();
             response = new Response(Response.INTERNAL_ERROR_MSG, Response.INTERNAL_ERROR);
         }
-        responseHandler.respond(response, ResponseHandler.JSON_CONTENT);
+        responseHandler.respond(response);
     }
 
     //Parse routes to camelCase format

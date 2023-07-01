@@ -58,4 +58,8 @@ public class FileModel {
     public long fileSize() throws IOException {
         return Files.asByteSource(file).size() / 1024;
     }
+
+    public String getExtension() {
+        return Files.getFileExtension(fileName);
+    }
 }
