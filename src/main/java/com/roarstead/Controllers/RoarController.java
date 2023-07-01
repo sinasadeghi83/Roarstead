@@ -25,13 +25,38 @@ public class RoarController extends BaseController {
     private static final String GROAR_ID_KEY = "groar_id";
     private static final String REROARED_ID_KEY = "reroared_id";
     private static final String REROARING_SELF_ERR = "You can't Reroar yourself!";
+    private static final String QUOTED_ROAR_KEY = "quoted_roar_id";
 
     @Override
     public Map<String, List<String>> accessControl() {
         return Map.of(
                 "actionRoar", List.of("@"),
-                "actionRoarImage", List.of("@")
+                "actionRoarImage", List.of("@"),
+                "actionQuoteRoar", List.of("@")
         );
+    }
+
+    @POST
+    public Response actionQuoteRoar(JsonObject requestBody) throws Exception{
+        int quotedId = requestBody.get(QUOTED_ROAR_KEY).getAsInt();
+        Database db = App.getCurrentApp().getDb();
+
+        GRoar quotedRoar = db.getSession()
+                .createQuery("FROM GRoar WHERE id=:id", GRoar.class)
+                .setParameter("id", quotedId)
+                .getSingleResultOrNull();
+        if(quotedRoar == null)
+            throw new NotFoundException();
+
+        User user = (User) App.getCurrentApp().getAuthManager().identity();
+        GRoarForm roarForm = gson.fromJson(requestBody, GRoarForm.class);
+
+        db.ready();
+        QRoar qroar = new QRoar(user, roarForm.getText(), quotedRoar);
+        db.getSession().persist(qroar);
+        db.done();
+
+        return new Response(qroar, Response.OK);
     }
 
     @POST
@@ -118,10 +143,5 @@ public class RoarController extends BaseController {
         db.done();
 
         return new Response(gRoar, Response.OK);
-
-//        List<RoarMedia> roarMedias = db.getSession()
-//                .createQuery("FROM RoarMedia WHERE id IN :roarMediaIds")
-//                .setParameterList("roarMediaIds", roarForm.getRoarMediaIds())
-//                .getResultList();
     }
 }

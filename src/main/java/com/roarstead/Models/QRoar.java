@@ -15,6 +15,15 @@ public class QRoar extends GRoar{
     @JoinColumn(name = "quoted_roar_id", nullable = false)
     protected GRoar quotedRoar;
 
+    public QRoar(GRoar quotedRoar) {
+        this.quotedRoar = quotedRoar;
+    }
+
+    public QRoar(User writer, String text, GRoar quotedRoar) {
+        super(writer, text);
+        this.quotedRoar = quotedRoar;
+    }
+
     public GRoar getQuotedRoar() {
         return quotedRoar;
     }
