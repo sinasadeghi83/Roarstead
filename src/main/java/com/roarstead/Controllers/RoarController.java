@@ -27,14 +27,65 @@ public class RoarController extends BaseController {
     private static final String REROARING_SELF_ERR = "You can't Reroar yourself!";
     private static final String QUOTED_ROAR_KEY = "quoted_roar_id";
     private static final String REPLY_TO_KEY = "reply_to";
+    private static final String LIKINIG_GROAR_KEY = "liking_groar_id";
 
     @Override
     public Map<String, List<String>> accessControl() {
         return Map.of(
                 "actionRoar", List.of("@"),
                 "actionRoarImage", List.of("@"),
-                "actionQuoteRoar", List.of("@")
+                "actionQuoteRoar", List.of("@"),
+                "actionLike", List.of("@"),
+                "actionUnlike", List.of("@")
         );
+    }
+
+    //TODO: Creating PUT annotation
+    @POST
+    public Response actionUnlike(JsonObject requestBody) throws Exception{
+        int likingGroarId = requestBody.get(LIKINIG_GROAR_KEY).getAsInt();
+        Database db = App.getCurrentApp().getDb();
+        GRoar groar = db.getSession()
+                .createQuery("FROM GRoar gr WHERE gr.id=:id", GRoar.class)
+                .setParameter("id", likingGroarId)
+                .getSingleResultOrNull();
+
+        if(groar == null){
+            throw new NotFoundException();
+        }
+
+        User user = (User) App.getCurrentApp().getAuthManager().identity();
+
+        db.ready();
+        groar.unLike(user);
+        db.getSession().merge(groar);
+        db.done();
+
+        return new Response(groar, Response.OK);
+    }
+
+    //TODO: Creating PUT annotation
+    @POST
+    public Response actionLike(JsonObject requestBody) throws Exception{
+        int likingGroarId = requestBody.get(LIKINIG_GROAR_KEY).getAsInt();
+        Database db = App.getCurrentApp().getDb();
+        GRoar groar = db.getSession()
+                .createQuery("FROM GRoar gr WHERE gr.id=:id", GRoar.class)
+                .setParameter("id", likingGroarId)
+                .getSingleResultOrNull();
+
+        if(groar == null){
+            throw new NotFoundException();
+        }
+
+        User user = (User) App.getCurrentApp().getAuthManager().identity();
+
+        db.ready();
+        groar.like(user);
+        db.getSession().merge(groar);
+        db.done();
+
+        return new Response(groar, Response.OK);
     }
 
     @POST
