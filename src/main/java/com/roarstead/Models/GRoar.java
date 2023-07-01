@@ -51,6 +51,15 @@ public class GRoar extends Roar{
     @OneToMany(mappedBy = "quotedRoar")
     protected Set<QRoar> quotes;
 
+    @Exclude
+    @OneToMany(mappedBy = "replyTo")
+    protected Set<GRoar> replies;
+
+    @SerializedName("reply_to")
+    @ManyToOne
+    @JoinColumn(name = "reply_to")
+    protected GRoar replyTo;
+
     @PrePersist
     protected void onCreate() {
         super.onCreate();
@@ -65,6 +74,13 @@ public class GRoar extends Roar{
         super(writer);
         this.writer = writer;
         this.text = text;
+    }
+
+    public GRoar(User writer, String text, GRoar replyTo) {
+        super(writer);
+        this.writer = writer;
+        this.text = text;
+        this.replyTo = replyTo;
     }
 
     public User getWriter() {
@@ -113,5 +129,21 @@ public class GRoar extends Roar{
 
     public void setQuotes(Set<QRoar> quotes) {
         this.quotes = quotes;
+    }
+
+    public GRoar getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(GRoar replyTo) {
+        this.replyTo = replyTo;
+    }
+
+    public Set<GRoar> getReplies() {
+        return replies;
+    }
+
+    public void setReplies(Set<GRoar> replies) {
+        this.replies = replies;
     }
 }
