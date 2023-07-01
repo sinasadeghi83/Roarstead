@@ -1,7 +1,9 @@
 package com.roarstead.Models;
 
 import com.google.gson.annotations.SerializedName;
+import com.roarstead.App;
 import com.roarstead.Components.Annotation.Exclude;
+import com.roarstead.Components.Database.Database;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 
@@ -65,8 +67,8 @@ public class GRoar extends Roar{
     protected void onCreate() {
         super.onCreate();
         LocalDateTime currentDateTime = LocalDateTime.now();
-        Date currentDate = Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant());
-        this.createdAt = currentDate;
+        this.createdAt = Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        hashtags = Hashtag.extractHashtags(this.text);
     }
 
     public GRoar(){}
