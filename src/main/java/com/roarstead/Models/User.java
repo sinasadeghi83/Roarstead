@@ -79,9 +79,9 @@ public class User extends Auth {
     @OneToMany(mappedBy = "uploader")
     Set<RoarMedia> uploadedMedia;
 
-//    @ManyToMany
-//    @JoinTable(name = "roar_like", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "roar-id"))
-//    private Set<Roar> likedRoars;
+    @Exclude
+    @ManyToMany(mappedBy = "usersLiked")
+    Set<GRoar> likedGroars;
 
     public User() {
 
@@ -102,14 +102,6 @@ public class User extends Auth {
     public void enterPassword(String password) {
         setPassword(password);
     }
-  
-//    public void like(Roar roar) {
-//        likedRoars.add(roar);
-//    }
-//
-//    public void unLike(Roar roar) {
-//        likedRoars.remove(roar);
-//    }
 
     @Override
     public Auth identity() throws NotAuthenticatedException {
@@ -246,5 +238,45 @@ public class User extends Auth {
             throw new NotFoundException();
         removeFollowing(following);
         return following;
+    }
+
+    public Set<Roar> getRoars() {
+        return roars;
+    }
+
+    public void setRoars(Set<Roar> roars) {
+        this.roars = roars;
+    }
+
+    public Set<GRoar> getGroars() {
+        return groars;
+    }
+
+    public void setGroars(Set<GRoar> groars) {
+        this.groars = groars;
+    }
+
+    public Set<GRoar> getRoarsLiked() {
+        return roarsLiked;
+    }
+
+    public void setRoarsLiked(Set<GRoar> roarsLiked) {
+        this.roarsLiked = roarsLiked;
+    }
+
+    public Set<RoarMedia> getUploadedMedia() {
+        return uploadedMedia;
+    }
+
+    public void setUploadedMedia(Set<RoarMedia> uploadedMedia) {
+        this.uploadedMedia = uploadedMedia;
+    }
+
+    public Set<GRoar> getLikedGroars() {
+        return likedGroars;
+    }
+
+    public void setLikedGroars(Set<GRoar> likedGroars) {
+        this.likedGroars = likedGroars;
     }
 }

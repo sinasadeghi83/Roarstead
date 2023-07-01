@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -35,15 +36,6 @@ public class GRoar extends Roar{
     protected Date createdAt;
 
     @Exclude
-    @ManyToMany
-    @JoinTable(
-            name = "likes",
-            joinColumns = @JoinColumn(name = "roar_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    protected Set<User> usersLiked;
-
-    @Exclude
     @OneToMany(mappedBy = "reroared")
     protected Set<Reroar> reroars;
 
@@ -59,6 +51,15 @@ public class GRoar extends Roar{
     @ManyToOne
     @JoinColumn(name = "reply_to")
     protected GRoar replyTo;
+
+    @Exclude
+    @ManyToMany
+    @JoinTable(
+            name = "groar_like",
+            joinColumns = @JoinColumn(name="groar_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "user_liked_id", nullable = false)
+    )
+    protected Set<User> usersLiked;
 
     @PrePersist
     protected void onCreate() {
@@ -81,6 +82,18 @@ public class GRoar extends Roar{
         this.writer = writer;
         this.text = text;
         this.replyTo = replyTo;
+    }
+
+    public void like(User user) {
+        if(usersLiked == null)
+            usersLiked = new HashSet<>();
+        usersLiked.add(user);
+    }
+
+    public void unLike(User user) {
+        if(usersLiked == null)
+            return;
+        usersLiked.remove(user);
     }
 
     public User getWriter() {
