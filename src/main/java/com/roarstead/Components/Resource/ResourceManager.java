@@ -1,5 +1,6 @@
 package com.roarstead.Components.Resource;
 
+import com.google.common.io.BaseEncoding;
 import com.google.common.io.Files;
 import com.roarstead.App;
 import com.roarstead.Components.Database.Database;
@@ -113,6 +114,16 @@ public class ResourceManager {
             throw new BadRequestException();
         }
         return image;
+    }
+
+    public String convertImageToBase64(Image image) throws Exception {
+        File file = image.getFileModel().getFile();
+        if (file.exists()) {
+            byte[] fileContent = Files.toByteArray(file);
+            return BaseEncoding.base64().encode(fileContent);
+        } else {
+            return null;
+        }
     }
 
     class HttpHandlerRequestContext implements RequestContext{
