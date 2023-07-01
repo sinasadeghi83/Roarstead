@@ -63,6 +63,22 @@ public class User extends Auth {
     @ManyToMany(mappedBy = "followings")
     Set<User> followers;
 
+    @Exclude
+    @OneToMany(mappedBy = "sender")
+    Set<Roar> roars;
+
+    @Exclude
+    @OneToMany(mappedBy = "writer")
+    Set<GRoar> groars;
+
+    @Exclude
+    @ManyToMany(mappedBy = "usersLiked")
+    Set<GRoar> roarsLiked;
+
+    @Exclude
+    @OneToMany(mappedBy = "uploader")
+    Set<RoarMedia> uploadedMedia;
+
 //    @ManyToMany
 //    @JoinTable(name = "roar_like", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "roar-id"))
 //    private Set<Roar> likedRoars;

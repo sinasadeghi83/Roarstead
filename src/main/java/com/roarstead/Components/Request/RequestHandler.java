@@ -67,7 +67,7 @@ public class RequestHandler {
                 response = baseController.runAction(actionName, rawBody);
             }catch (ClassNotFoundException | NoSuchMethodException e) {
                 throw new NotFoundException();
-            }catch (NullPointerException e) {
+            }catch (NullPointerException | IllegalArgumentException e) {
                 e.printStackTrace();
                 System.err.println(e.getMessage());
                 throw new BadRequestException();

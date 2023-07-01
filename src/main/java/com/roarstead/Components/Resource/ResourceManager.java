@@ -3,7 +3,9 @@ package com.roarstead.Components.Resource;
 import com.google.common.io.Files;
 import com.roarstead.App;
 import com.roarstead.Components.Database.Database;
+import com.roarstead.Components.Exceptions.BadRequestException;
 import com.roarstead.Components.Exceptions.FileModelIsNotAnImageException;
+import com.roarstead.Components.Exceptions.UnprocessableEntityException;
 import com.roarstead.Components.Resource.Models.FileModel;
 import com.roarstead.Components.Resource.Models.Image;
 import com.sun.net.httpserver.HttpExchange;
@@ -93,6 +95,24 @@ public class ResourceManager {
         db.getSession().remove(fileModel);
         db.done();
         fileModel.getFile().delete();
+    }
+
+    public Image retrieveUploadedImage() throws Exception {
+        Database db = App.getCurrentApp().getDb();
+        //Retrieve uploaded image
+        Image image;
+        try {
+            db.ready();
+            image = createImageFromFileItem(0);
+            db.getSession().persist(image);
+            db.done();
+        } catch (FileModelIsNotAnImageException e){
+            deleteFileModel(e.getFileModel());
+            throw new UnprocessableEntityException("File is not an image!");
+        } catch (Exception e) {
+            throw new BadRequestException();
+        }
+        return image;
     }
 
     class HttpHandlerRequestContext implements RequestContext{
