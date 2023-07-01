@@ -43,7 +43,7 @@ public class ProfileController extends BaseController {
 
         Image imageHeader = wantedUser.getProfile().getHeaderImage();
         String extension = imageHeader != null ? imageHeader.getExtension() : "png";
-        return new Response(App.getCurrentApp().getResourceManager().convertImageToBase64(imageHeader), Response.OK, "image/" + extension);
+        return new Response(App.getCurrentApp().getResourceManager().convertMediaToBase64(imageHeader), Response.OK, "image/" + extension);
     }
 
     public Response actionAvatar() throws Exception{
@@ -66,6 +66,6 @@ public class ProfileController extends BaseController {
 
         Image avatar = wantedUser.getProfile().getProfImage();
         String extension = avatar != null ? avatar.getExtension() : "png";
-        return new Response(App.getCurrentApp().getResourceManager().convertImageToBase64(avatar), Response.OK, "image/" + extension);
+        return new Response(App.getCurrentApp().getResourceManager().convertMediaToBase64(avatar), Response.OK, "image/" + extension);
     }
 }
