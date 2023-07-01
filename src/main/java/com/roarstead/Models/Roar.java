@@ -1,5 +1,6 @@
 package com.roarstead.Models;
 
+import com.google.gson.annotations.SerializedName;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public abstract class Roar {
     @JoinColumn(name="sender_id", nullable = false)
     protected User sender;
 
+    @SerializedName("sent_at")
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "sent_at", insertable = true, updatable = false)
     protected Date sentAt;

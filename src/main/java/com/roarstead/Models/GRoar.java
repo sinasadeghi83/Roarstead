@@ -1,5 +1,6 @@
 package com.roarstead.Models;
 
+import com.google.gson.annotations.SerializedName;
 import com.roarstead.Components.Annotation.Exclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -14,6 +15,7 @@ import java.util.Set;
 public class GRoar extends Roar{
 
     public static final int MAX_CHARS_GROAR = 280;
+    public static final int MIN_CHARS_GROAR = 4;
 
     @ManyToOne
     @JoinColumn(name="writer_id", nullable = false)
@@ -27,6 +29,7 @@ public class GRoar extends Roar{
     @OneToMany(mappedBy = "groar")
     protected Set<RoarMedia> roarMediaSet;
 
+    @SerializedName("created_at")
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", insertable = true, updatable = false)
     protected Date createdAt;
