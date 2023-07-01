@@ -40,7 +40,7 @@ public class App extends Thread {
         this.config = new Config();
         this.rbacConfig = new com.roarstead.Configs.Auth.Rbac.RbacConfig();
         this.authManager = new AuthManager();
-        gson = new GsonBuilder().setExclusionStrategies(new ExcludeStrategy()).registerTypeAdapter(Date.class, new DateDeserializer()).create();
+        gson = new GsonBuilder().addSerializationExclusionStrategy(new ExcludeStrategy()).addDeserializationExclusionStrategy(new ExcludeStrategy()).registerTypeAdapter(Date.class, new DateDeserializer()).create();
         this.classLoader = classLoader;
         this.resourceManager = new ResourceManager();
     }
