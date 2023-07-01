@@ -9,6 +9,11 @@ import jakarta.persistence.Table;
 @Entity
 public class Reroar extends Roar {
 
+    public Reroar(User sender, GRoar reroared) {
+        super(sender);
+        this.reroared = reroared;
+    }
+
     @ManyToOne
     @JoinColumn(name = "reroared_id", nullable = false)
     protected GRoar reroared;

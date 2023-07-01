@@ -7,6 +7,7 @@ import com.roarstead.Components.Controller.BaseController;
 import com.roarstead.Components.Database.Database;
 import com.roarstead.Components.Exceptions.BadRequestException;
 import com.roarstead.Components.Exceptions.FileModelIsNotAnImageException;
+import com.roarstead.Components.Exceptions.NotFoundException;
 import com.roarstead.Components.Exceptions.UnprocessableEntityException;
 import com.roarstead.Components.Resource.Models.Image;
 import com.roarstead.Components.Resource.ResourceManager;
@@ -22,6 +23,8 @@ public class RoarController extends BaseController {
     private static final String MEDIA_TYPE_KEY = "media_type";
     private static final String ALT_TEXT_KEY = "alt_text";
     private static final String GROAR_ID_KEY = "groar_id";
+    private static final String REROARED_ID_KEY = "reroared_id";
+    private static final String REROARING_SELF_ERR = "You can't Reroar yourself!";
 
     @Override
     public Map<String, List<String>> accessControl() {
@@ -29,6 +32,30 @@ public class RoarController extends BaseController {
                 "actionRoar", List.of("@"),
                 "actionRoarImage", List.of("@")
         );
+    }
+
+    @POST
+    public Response actionReroar(JsonObject requestBody) throws Exception{
+        int reroaredId = requestBody.get(REROARED_ID_KEY).getAsInt();
+
+        Database db = App.getCurrentApp().getDb();
+        GRoar reroared = db.getSession()
+                .createQuery("FROM GRoar WHERE id=:id", GRoar.class)
+                .setParameter("id", reroaredId)
+                .getSingleResultOrNull();
+        if(reroared == null)
+            throw new NotFoundException();
+
+        User user = (User) App.getCurrentApp().getAuthManager().identity();
+        if(reroared.getSender().getId() == user.getId())
+            throw new BadRequestException(REROARING_SELF_ERR);
+
+        db.ready();
+        Reroar reroar = new Reroar(user, reroared);
+        db.getSession().persist(reroar);
+        db.done();
+
+        return new Response(reroar, Response.OK);
     }
 
     @POST
