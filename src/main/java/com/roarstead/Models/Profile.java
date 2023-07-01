@@ -57,7 +57,7 @@ public class Profile {
     }
 
     public static void validateForHeaderImage(Image headerImage) throws IOException, RequestEntityTooLarge, UnprocessableEntityException {
-        if(headerImage.imageSize() > MAX_HEADER_SIZE)
+        if(headerImage.mediaSize() > MAX_HEADER_SIZE)
             throw new RequestEntityTooLarge(MAX_HEADER_SIZE, Image.SIZE_UNIT);
         int height = headerImage.getHeight();
         int width = headerImage.getWidth();
@@ -71,7 +71,7 @@ public class Profile {
     }
 
     public static void validateForAvatarImage(Image profImage) throws IOException, RequestEntityTooLarge, UnprocessableEntityException {
-        if(profImage.imageSize() > MAX_AVATAR_SIZE)
+        if(profImage.mediaSize() > MAX_AVATAR_SIZE)
             throw new RequestEntityTooLarge(MAX_AVATAR_SIZE, Image.SIZE_UNIT);
         int height = profImage.getHeight();
         int width = profImage.getWidth();
