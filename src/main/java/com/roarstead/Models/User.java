@@ -22,8 +22,8 @@ import java.util.Set;
 @Table(name = "users")
 public class User extends Auth {
 
-    private static final String INVALID_USER_MESSAGE = "Invalid User";
-    private static final String FORBIDDEN_BLOCKED_ERR = "Sorry! You have been blocked by this user.";
+    public static final String INVALID_USER_MESSAGE = "Invalid User";
+    public static final String FORBIDDEN_BLOCKED_ERR = "Sorry! You have been blocked by this user.";
 
     @Column(name = "first_name", nullable = false)
     @SerializedName("first_name")
