@@ -117,12 +117,14 @@ public class ResourceManager {
     }
 
     public String convertImageToBase64(Image image) throws Exception {
+        if(image == null)
+            return "";
         File file = image.getFileModel().getFile();
         if (file.exists()) {
             byte[] fileContent = Files.toByteArray(file);
             return BaseEncoding.base64().encode(fileContent);
         } else {
-            return null;
+            return "";
         }
     }
 
