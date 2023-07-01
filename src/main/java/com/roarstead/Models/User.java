@@ -6,6 +6,7 @@ import com.roarstead.Components.Annotation.Exclude;
 import com.roarstead.Components.Auth.Models.Auth;
 import com.roarstead.Components.Business.Models.Country;
 import com.roarstead.Components.Exceptions.BadRequestException;
+import com.roarstead.Components.Exceptions.ForbiddenException;
 import com.roarstead.Components.Exceptions.NotAuthenticatedException;
 import com.roarstead.Components.Exceptions.NotFoundException;
 import jakarta.persistence.Column;
@@ -22,6 +23,8 @@ import java.util.Set;
 public class User extends Auth {
 
     private static final String INVALID_USER_MESSAGE = "Invalid User";
+    private static final String FORBIDDEN_BLOCKED_ERR = "Sorry! You have been blocked by this user.";
+
     @Column(name = "first_name", nullable = false)
     @SerializedName("first_name")
     private String firstName;
@@ -83,8 +86,20 @@ public class User extends Auth {
     @ManyToMany(mappedBy = "usersLiked")
     Set<GRoar> likedGroars;
 
-    public User() {
+    @Exclude
+    @ManyToMany
+    @JoinTable(
+            name = "blacklist",
+            joinColumns = @JoinColumn(name = "blocker_id"),
+            inverseJoinColumns = @JoinColumn(name = "blocked_id")
+    )
+    Set<User> blacklist;
 
+    @Exclude
+    @ManyToMany(mappedBy = "blacklist")
+    Set<User> blockedByList;
+
+    public User() {
     }
 
     public User(String username, String firstName, String lastName, String email, String phone,Country country, String password, Date birthDate) {
@@ -198,17 +213,22 @@ public class User extends Auth {
         this.followings = followings;
     }
 
-    public void addFollowing(User following) throws BadRequestException {
-        if(following == null)
+    public void addFollowing(User following) throws Exception {
+        if(followings == null)
             followings = new HashSet<>();
+
         if(following == null || following.getId() == id)
             throw new BadRequestException(INVALID_USER_MESSAGE);
+
+        if(blockedByList.contains(following))
+            throw new ForbiddenException(FORBIDDEN_BLOCKED_ERR);
+
         followings.add(following);
     }
 
     //Add user with id = followingId to the following list of the logged-in user
     //Returns followed user
-    public User addFollowing(int followingId) throws NotFoundException, BadRequestException {
+    public User addFollowing(int followingId) throws Exception {
         User following = App.getCurrentApp().getDb().getSession()
                 .createQuery("FROM User u WHERE u.id=:id", User.class)
                 .setParameter("id", followingId)
@@ -223,7 +243,7 @@ public class User extends Auth {
     public void removeFollowing(User following) throws BadRequestException {
         if(following == null)
             followings = new HashSet<>();
-        if(following == null || following.getId() == id || !followings.contains(following))
+        if(following == null || following.getId() == id)
             throw new BadRequestException(INVALID_USER_MESSAGE);
         followings.remove(following);
     }
@@ -238,6 +258,30 @@ public class User extends Auth {
             throw new NotFoundException();
         removeFollowing(following);
         return following;
+    }
+
+    public User blockUser(int userId) throws Exception{
+        User blockingUser = App.getCurrentApp().getDb().getSession()
+                .createQuery("FROM User u WHERE u.id=:id", User.class)
+                .setParameter("id", userId)
+                .getSingleResultOrNull();
+        //Throws exception if user does not exist
+        if(blockingUser == null)
+            throw new NotFoundException();
+        blockUser(blockingUser);
+        return blockingUser;
+    }
+
+    public void blockUser(User blockingUser) throws Exception {
+        if(blacklist == null)
+            blacklist = new HashSet<>();
+
+        if(blockingUser == null || blockingUser.getId() == id)
+            throw new BadRequestException(INVALID_USER_MESSAGE);
+
+        removeFollowing(blockingUser);
+        blockingUser.removeFollowing(this);
+        blacklist.add(blockingUser);
     }
 
     public Set<Roar> getRoars() {
@@ -278,5 +322,21 @@ public class User extends Auth {
 
     public void setLikedGroars(Set<GRoar> likedGroars) {
         this.likedGroars = likedGroars;
+    }
+
+    public Set<User> getBlacklist() {
+        return blacklist;
+    }
+
+    public void setBlacklist(Set<User> blacklist) {
+        this.blacklist = blacklist;
+    }
+
+    public Set<User> getBlockedByList() {
+        return blockedByList;
+    }
+
+    public void setBlockedByList(Set<User> blockedByList) {
+        this.blockedByList = blockedByList;
     }
 }
